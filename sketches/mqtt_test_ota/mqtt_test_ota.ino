@@ -35,10 +35,27 @@ netInfo homeNet = {  .mqttHost = RPI_MQTT_IP,      //can be blank if not using M
 ESPHelper myESP(&homeNet);
 
 const char* HOSTNAME = "esp_test";
-#define TEST_TOPIC "hata/temp/mqtest"
-#define TEST_CTRL_TOPIC "hata/temp/mqtest_ctrl"
+
+#define TEST_TOPIC_BASE "hata/temp/test/"
+#define OUT_TOPIC  TEST_TOPIC_BASE "output/"
+#define CTRL_TOPIC TEST_TOPIC_BASE "config/"
+
+//output topic nodes
+#define PUB_ACK   OUT_TOPIC "ack"
+#define PUB_STATE OUT_TOPIC "state"
+#define PUB_TEMP  OUT_TOPIC "temp"
+
+#define CTL_VAL1 "val1"
+#define CTL_VAL2 "val2"
+
+//#define DEEP_SLEEP_EN
+#define DEEP_SLEEP_MS 5000
 
 bool initDone = false;  
+
+bool configDone = false;
+int ctrl_val1 = -1;
+int ctrl_val2 = -1;
 
 void setup() {
 	
@@ -50,8 +67,11 @@ void setup() {
 	myESP.OTA_enable();
 	myESP.OTA_setPassword(OTA_PASS);
 	myESP.OTA_setHostnameWithVersion(HOSTNAME);
-	myESP.addSubscription(TEST_CTRL_TOPIC);
+  //subscribe to all subnodes
+	myESP.addSubscription(OUT_TOPIC "#");
+  myESP.addSubscription(CTRL_TOPIC "#");
 	myESP.setMQTTCallback(callback);
+  //TODO: remove if pin used
   myESP.enableHeartbeat(BUILTIN_LED);
 	myESP.begin();
 	
@@ -64,13 +84,36 @@ void loop(){
     if(!initDone)
     {
       initDone = true;
-      postTimeStamp(" Up n running.");
+      publish(PUB_STATE, " Up n running.");
     }
+  }
+  if (!configDone)
+  {
+    Serial.println("not set...");
   }
 	//Put application code here
   delay (1000);
+  if ( !configDone && (ctrl_val1 >= 0) && (ctrl_val2 >= 0))
+  {
+    configDone = true;
+    Serial.println(" #set on 1...");
+  }
 	yield();
+  if ( !configDone && (ctrl_val1 >= 0) && (ctrl_val2 >= 0))
+  {
+    configDone = true;
+    Serial.println("### set on 2...");
+  }
   delay (1000);
+
+#ifdef DEEP_SLEEP_EN    
+  if (configDone)
+  {
+    publish(PUB_STATE, "...deep sleep...");
+    //ESP.deepSleep(DEEP_SLEEP_MS * 1000);
+  }
+#endif
+
 }
 
 void callback(char* topic, uint8_t* payload, unsigned int length) 
@@ -83,64 +126,63 @@ void callback(char* topic, uint8_t* payload, unsigned int length)
     newPayload[length] = '\0';
     String printStr;
     char message[CBUF_SZ];
-    
-    if(topicStr.equals(TEST_CTRL_TOPIC))
-    {
-      if(newPayload[0] == '1')
+
+    if (topicStr.startsWith(CTRL_TOPIC))
+    { 
+      if(topicStr.endsWith(CTL_VAL1))
       {
-        printStr = "Got 1";
-        printStr.toCharArray(message, CBUF_SZ);   
-        myESP.publish(TEST_TOPIC, message, true);  
-        Serial.println(printStr);    
+        if(newPayload[0] == '1')
+        {
+          ctrl_val1 = 1;
+          printStr = "Got 1 from " CTL_VAL1;
+          printStr.toCharArray(message, CBUF_SZ);   
+          myESP.publish(PUB_ACK, message, true);  
+          Serial.println(printStr);    
+        }
+        else if(newPayload[0] == '0')
+        {
+          ctrl_val1 = 0;
+          printStr = "Got 0 from " CTL_VAL1;
+          printStr.toCharArray(message, CBUF_SZ);   
+          myESP.publish(PUB_ACK, message, true);
+          Serial.println(printStr);
+        }
       }
-      else if(newPayload[0] == '0')
+      else if(topicStr.endsWith(CTL_VAL2))
       {
-        printStr = "Got 0";
-        printStr.toCharArray(message, CBUF_SZ);   
-        myESP.publish(TEST_TOPIC, message, true);
-        Serial.println(printStr);
+        if(newPayload[0] == '1')
+        {
+          ctrl_val2 = 1;
+          printStr = "Got 1 from " CTL_VAL2;
+          printStr.toCharArray(message, CBUF_SZ);   
+          myESP.publish(PUB_ACK, message, true);  
+          Serial.println(printStr);    
+        }
+        else if(newPayload[0] == '0')
+        {
+          ctrl_val2 = 0;
+          printStr = "Got 0 from " CTL_VAL2;
+          printStr.toCharArray(message, CBUF_SZ);   
+          myESP.publish(PUB_ACK, message, true);
+          Serial.println(printStr);
+        }
       }
     }
 }
 
-
-
-
-
-//take a char* and use it as a message with an appended timestamp
-void postTimeStamp(const char* text){
-  char timeStamp[30];
-  createTimeString(timeStamp, 30);
-
-
+//append extra info
+void publish(const char* topic, const char* text){
+  //TODO: fix char/string conversions
   String pubString = String(HOSTNAME);
   pubString += " : ";
   pubString += text;
-  pubString += " - ";
-  pubString += timeStamp;
 
   //conver the String into a char*
   char message[128];
   pubString.toCharArray(message, 128);
-  myESP.publish(TEST_TOPIC, message, true);
+  myESP.publish(topic, message, true);
 #ifdef USE_SERIAL
   Serial.println(pubString);
 #endif    
 }
 
-//create a timestamp string
-void createTimeString(char* buf, int length){
-    time_t t = now();
-    String timeString = String(hour(t));
-    timeString += ":";
-    timeString += minute(t);
-    timeString += ":";
-    timeString += second(t);
-    timeString += " ";
-    timeString += month(t);
-    timeString += "/";
-    timeString += day(t);
-    timeString += "/";
-    timeString += year(t);
-    timeString.toCharArray(buf, length);
-}
