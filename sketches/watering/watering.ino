@@ -24,7 +24,7 @@
 #include <credentials.h>
 #include "DHT.h"
 
-#define USE_SERIAL 
+#define DEBUG_VER
 
 // Uncomment whatever DHT type you're using!
 #define DHTTYPE DHT11  // DHT 11
@@ -45,9 +45,11 @@ const int relay2 = D1;
 
 //consts for the timers for a cycle and section
 const unsigned long NUM_SPRINKLERS = 2;
+//TODO: section time as mqtt var
 const unsigned long SECTION_TIME = 3L * MINUTE;
 //const unsigned long SECTION_TIME = 10L * SECOND;
 const unsigned long CYCLE_TIME = NUM_SPRINKLERS * SECTION_TIME;
+
 
 const int TRIGGER_HOUR = 17;
 const int TRIGGER_MIN = 00;
@@ -57,12 +59,8 @@ const int TIMEZONE = -8;
 
 const unsigned long DEEP_SLEEP_MS = 10L * MINUTE;
 
-//ESPHelper vars
+
 const char* HOSTNAME = "esp_water";
-const char* CB_TOPIC_DEBUG = "hata/watering/debug";
-const char* CB_TOPIC_RAIN_DELAY = "hata/watering/raindelay";
-const char* CB_TOPIC_MANUAL_RUN = "hata/watering/manualrun";
-const char* STATUS_TOPIC = "hata/watering/status";
 
 netInfo homeNet = {	.mqttHost = RPI_MQTT_IP,			//can be blank if not using MQTT
 					.mqttUser = "", 	//can be blank
@@ -72,13 +70,53 @@ netInfo homeNet = {	.mqttHost = RPI_MQTT_IP,			//can be blank if not using MQTT
 					.pass = myPASSWORD};
 ESPHelper myESP(&homeNet);
 
-//NTP setup vars
-static const char ntpServerName[] = "us.pool.ntp.org";
-const int timeZone = TIMEZONE;
-WiFiUDP Udp;
-unsigned int localPort = 8888;  // local port to listen for UDP packets
-time_t getNtpTime();
-void sendNTPpacket(IPAddress &address);
+
+const char* CB_TOPIC_DEBUG = "hata/watering/debug";
+const char* CB_TOPIC_RAIN_DELAY = "hata/watering/raindelay";
+const char* CB_TOPIC_MANUAL_RUN = "hata/watering/manualrun";
+const char* STATUS_TOPIC = "hata/watering/status";
+
+#ifdef DEBUG_VER
+#define WATERING_TOPIC_BASE "hata/temp/watering/"
+#else
+#define WATERING_TOPIC_BASE "hata/watering/"
+#endif
+
+#define OUT_TOPIC  WATERING_TOPIC_BASE "output/"
+#define CTRL_TOPIC WATERING_TOPIC_BASE "config/"
+
+//output topic nodes
+#define PUB_DEBUG  OUT_TOPIC "debug"
+#define PUB_STATE  OUT_TOPIC "state"
+#define PUB_VBATT  OUT_TOPIC "vbatt"
+#define PUB_TEMP  OUT_TOPIC "temp"
+#define PUB_HUMIDITY  OUT_TOPIC "humidity"
+
+//config topic nodes
+#define CTRL_DEEP_SLEEP_EN  "deep_sleep_en"
+#define CTRL_DEEP_SLEEP_SEC  "deep_sleep_sec"
+#define CTRL_ZONE1_ACTIVE "zone1_on"
+#define CTRL_ZONE2_ACTIVE "zone2_on"
+#define CTRL_ZONE1_TIME "zone1_time"
+#define CTRL_ZONE2_TIME "zone2_time"
+//#define CTRL_CUR_TIME   "time_val"
+
+/*
+ * config vars:
+ * - deep sleep ON & duration
+ * - start watering flag (vs manual override & separate schedule tracking)
+ * - time per zone
+ * - sleep time
+ * - current time? (minute intervals?)
+ * 
+ * pub vars:
+ * - state (booted/sleep/watering/active)
+ * - bat. voltage
+ * - temp (F/C)
+ * - humidity
+ * 
+ */
+
 
 //runCycle & hasStarted are variables that keep track of whether or not a cycle should be running.
 //runCycle tells the system that a cycle is running and hasStarted tells the system whether or not it has triggered
@@ -128,7 +166,7 @@ void setup() {
   //start DHT temp/humidity sensor
   dht.begin();
   
-#ifdef USE_SERIAL
+#ifdef DEBUG_VER
   Serial.begin(115200);
 #endif   
  
@@ -136,20 +174,14 @@ void setup() {
 	myESP.OTA_enable();
 	myESP.OTA_setPassword(OTA_PASS);
 	myESP.OTA_setHostname(HOSTNAME);
-	//myESP.enableHeartbeat(BUILTIN_LED);
-	myESP.setHopping(false);
+
 	myESP.addSubscription(CB_TOPIC_RAIN_DELAY);
   myESP.addSubscription(CB_TOPIC_DEBUG);
   myESP.addSubscription(CB_TOPIC_MANUAL_RUN);
 	myESP.setCallback(callback);
 	myESP.begin();		//start ESPHelper
 
-  uptime_ms = millis();  //cache uptime
-  
-	//setup NTP
-	Udp.begin(localPort);
-	setSyncProvider(getNtpTime);
-	setSyncInterval(300);
+  uptime_ms = millis();  //cache uptime  
 }
 
 
@@ -163,22 +195,12 @@ void loop()
          
 	if(myESP.loop() >= WIFI_ONLY){
 
-        //TODO: dont fail init if no time -cache old time before deep sleep
-        
 		//once we have a WiFi connection trigger some extra setup
 		if(!initDone){
-			delay(100);
-		  	//setup the NTP connection and get the current time
-			setupNTP();
-			delay(200);
-
-		  	//only set initDone to true if the time is set
-			if(timeStatus() != timeNotSet){
 				initDone = true;
         //clear loop timer to measure uptime
         loopTimer.reset();
 				postTimeStamp("Watering System Started");
-			}
 		}
 
 		if(initDone){
@@ -198,13 +220,13 @@ void loop()
       {
         bisFirstRun = false;
         //get temp info
-        if (!getHumidityTempC(&humidity, &ctemp) )
+        if (!getHumidityTempF(&humidity, &ftemp) )
         {
           postTimeStamp("Failed to read from DHT sensor!");
         }
         else
         {
-          ftemp = dht.convertCtoF(ctemp);
+          ftemp = dht.convertFtoC(ctemp);
           postStr = "Humidity (%): ";
           postStr += humidity;
           postStr += " Temp (C): ";
@@ -274,10 +296,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     //Also fix the payload by null terminating it and also convert that
     String topicStr = topic; 
     char newPayload[CBUF_SZ];
-    memcpy(newPayload, payload, length);
-    newPayload[length] = '\0';
     String printStr;
     char printBuff[CBUF_SZ];
+
+    memcpy(newPayload, payload, length);
+    newPayload[length] = '\0';
     
     if(topicStr.equals(CB_TOPIC_RAIN_DELAY)){
     	if(newPayload[0] == '1'){
@@ -337,8 +360,6 @@ void cycleHandler(){
 		postTimeStamp("Ended Cycle");
 		return;
 	}
-
-
 
 	//manages valves while a watering cycle is running
 	if(runCycle){
@@ -425,11 +446,11 @@ float getVbatt()
 }
 
 
-bool getHumidityTempC(float *humidity, float * ctemp)
+bool getHumidityTempF(float *humidity, float * ftemp)
 {
   int cnt = 0;
   
-  if (!humidity || !ctemp)
+  if (!humidity || !ftemp)
   {
     return false;
   }
@@ -438,7 +459,7 @@ bool getHumidityTempC(float *humidity, float * ctemp)
   do
   {
     *humidity = dht.readHumidity();
-    *ctemp = dht.readTemperature();
+    *ftemp = dht.readTemperature(true);
      cnt++;
      ///terminate loop and return failure after 10 attempts
      if (cnt > 10)
@@ -447,108 +468,45 @@ bool getHumidityTempC(float *humidity, float * ctemp)
      }
      delay (250);   //250ms DHT11 sensor latency
   }
-  while (isnan(*humidity) && isnan(*ctemp));
+  while (isnan(*humidity) && isnan(*ftemp));
 
   return true;
 }
 
 
-//take a char* and use it as a message with an appended timestamp
-void postTimeStamp(const char* text){
-	char timeStamp[30];
-  createTimeString(timeStamp, 30);
 
-
+//append extra info
+void publish(const char* topic, const char* text){
+  //TODO: fix char/string conversions
   String pubString = String(HOSTNAME);
   pubString += " : ";
   pubString += text;
-  pubString += " - ";
-  pubString += timeStamp;
 
   //conver the String into a char*
   char message[128];
   pubString.toCharArray(message, 128);
-  myESP.publish(STATUS_TOPIC, message, true);
+  myESP.publish(topic, message, true);
 #ifdef USE_SERIAL
   Serial.println(pubString);
 #endif    
 }
 
-//create a timestamp string
-void createTimeString(char* buf, int length){
-    time_t t = now();
-    String timeString = String(hour(t));
-    timeString += ":";
-    timeString += minute(t);
-    timeString += ":";
-    timeString += second(t);
-    timeString += " ";
-    timeString += month(t);
-    timeString += "/";
-    timeString += day(t);
-    timeString += "/";
-    timeString += year(t);
-    timeString.toCharArray(buf, length);
-}
 
 
-
-/*-------- NTP code ----------*/
-void setupNTP(){
-	delay(200);
-	Udp.begin(localPort);
-	setSyncProvider(getNtpTime);
-	setSyncInterval(300);
-}
-
-const int NTP_PACKET_SIZE = 48; // NTP time is in the first 48 bytes of message
-byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
-
-time_t getNtpTime(){
-	IPAddress ntpServerIP; // NTP server's ip address
-
-	while (Udp.parsePacket() > 0) ; // discard any previously received packets
-	// get a random server from the pool
-	WiFi.hostByName(ntpServerName, ntpServerIP);
-	sendNTPpacket(ntpServerIP);
-	uint32_t beginWait = millis();
-	while (millis() - beginWait < 1500) {
-		int size = Udp.parsePacket();
-		if (size >= NTP_PACKET_SIZE) {
-			Udp.read(packetBuffer, NTP_PACKET_SIZE);  // read packet into the buffer
-			unsigned long secsSince1900;
-			// convert four bytes starting at location 40 to a long integer
-			secsSince1900 =  (unsigned long)packetBuffer[40] << 24;
-			secsSince1900 |= (unsigned long)packetBuffer[41] << 16;
-			secsSince1900 |= (unsigned long)packetBuffer[42] << 8;
-			secsSince1900 |= (unsigned long)packetBuffer[43];
-			return secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR;
-		}
-	}
-	return 0; // return 0 if unable to get the time
-}
-
-// send an NTP request to the time server at the given address
-void sendNTPpacket(IPAddress &address)
+//take a char* and use it as a message with an appended timestamp
+void postTimeStamp(const char* text)
 {
-	// set all bytes in the buffer to 0
-	memset(packetBuffer, 0, NTP_PACKET_SIZE);
-	// Initialize values needed to form NTP request
-	// (see URL above for details on the packets)
-	packetBuffer[0] = 0b11100011;   // LI, Version, Mode
-	packetBuffer[1] = 0;     // Stratum, or type of clock
-	packetBuffer[2] = 6;     // Polling Interval
-	packetBuffer[3] = 0xEC;  // Peer Clock Precision
-	// 8 bytes of zero for Root Delay & Root Dispersion
-	packetBuffer[12] = 49;
-	packetBuffer[13] = 0x4E;
-	packetBuffer[14] = 49;
-	packetBuffer[15] = 52;
-	// all NTP fields have been given values, now
-	// you can send a packet requesting a timestamp:
-	Udp.beginPacket(address, 123); //NTP requests are to port 123
-	Udp.write(packetBuffer, NTP_PACKET_SIZE);
-	Udp.endPacket();
+  String pubString = String(HOSTNAME);
+  char message[128];
+
+  pubString += " : ";
+  pubString += text;
+  //conver the String into a char*
+  pubString.toCharArray(message, 128);
+  myESP.publish(STATUS_TOPIC, message, true);
+#ifdef DEBUG_VER
+  Serial.println(pubString);
+#endif    
 }
 
 
