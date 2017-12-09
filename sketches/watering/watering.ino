@@ -196,14 +196,12 @@ void setup()
 
 void loop()
 {
-  String postStr;
-  char postBuff[CBUF_SZ];
-  float vbatt, humidity, ctemp, ftemp;
 
 	if(myESP.loop() >= WIFI_ONLY)
   {
 		//once we have a WiFi connection trigger some extra setup
-		if(!initDone){
+		if(!initDone)
+    {
 				initDone = true;
         //clear loop timers
         loopTimer.reset();
@@ -211,56 +209,56 @@ void loop()
 				publishDebug("Watering System Started");
         publish(PUB_STATE, "Started");
 		}
-		else if(initDone)
+		
+    if(initDone)
     {  
       //log once for deep sleep or every 60 seconds for normal mode
       if (bisFirstRun || measureTimer.check())
       {        
         bisFirstRun = false;
         measureTimer.reset();
-        //get temp info
-#ifndef ESP8266        
-        if (!getHumidityTempF(&humidity, &ftemp) )
-#else          
-        if (true)
-#endif          
-        {
-          publishDebug("Failed to read from DHT sensor!");
-        }
-        else
-        {
-          ctemp = dht.convertFtoC(ftemp);
-          postStr = "Humidity (%): ";
-          postStr += humidity;
-          postStr += " Temp (C): ";
-          postStr += ctemp;
-          postStr += " Temp (F): ";
-          postStr += ftemp;
-          postStr.toCharArray(postBuff, CBUF_SZ);
-          publishDebug(postBuff);
-          
-          dtostrf(humidity, 10, 2, postBuff);
-          publish(PUB_HUMIDITY, postBuff);
-          dtostrf(ctemp, 10, 2, postBuff);
-          publish(PUB_CTEMP, postBuff);
-          dtostrf(ftemp, 10, 2, postBuff);
-          publish(PUB_FTEMP, postBuff);
-        }
-        
-        //get battery voltage
-        vbatt = getVbatt();
-        postStr = "Battery voltage (V): ";
-        postStr += vbatt;
-        postStr.toCharArray(postBuff, CBUF_SZ);
-        publishDebug(postBuff);
-        
-        dtostrf(vbatt, 10, 3, postBuff);
-        publish(PUB_VBATT, postBuff);
-      }
 
+        //fetch VBATT & temp/humidity
+        getAndPublishSensorInfo();
+      }
+      
       //if got all control topic settings, check what to do
       if (sprinkler.isInitDone)
       {
+        //check if should start watering
+        checkAndStartValves();
+        
+        //check if current isCycleRunning is over & close valve/reset vars
+        checkAndStopValves(false);
+      }
+    }
+  }
+  
+  yield();
+  
+  //if deep sleep enabled and nothing left to water, and 10+ sec elapsed since start, goto deep sleep
+  if (sprinkler.isInitDone && sprinkler.bEnableDeepSleep && (sprinkler.valvesLeft <= 0) && loopTimer.check())
+  {
+    publish(PUB_STATE, "Sleeping...");
+    ESP.deepSleep(sprinkler.deepSleep_sec * 1000 * 1000);  //in usec
+  }
+  else
+  {
+    delay (1000);
+  }
+}
+
+
+
+
+/*
+Check if watering should be started and open valves/update vars
+
+@param none
+@return none
+*/
+void checkAndStartValves()
+{
         //now check if can start watering
         if (sprinkler.bValve0En && !isCycleRunning)
         {
@@ -290,11 +288,20 @@ void loop()
           //open valve 1
           setValve(1);    
         }
+}
+        
+        
+/*
+Check if watering should be stopped and close valves/update vars
 
+@param bool isForceStop  - if false, check timers, if true, force regardless
+*/
+void checkAndStopValves(bool isForceStop)
+{
         //check if current isCycleRunning is over & close valve/reset vars
         if (isCycleRunning)
         {
-          if (sprinkler.bValve0On && sprinkler.valve0Timer.check())
+          if (sprinkler.bValve0On && (sprinkler.valve0Timer.check() || isForceStop))
           {
             publishDebug("Stopping Zone 1");
             publish(PUB_STATE, "Zone 1 done");
@@ -303,7 +310,8 @@ void loop()
             sprinkler.valvesLeft--;
             setValve(-1);
           }
-          if (sprinkler.bValve1On && sprinkler.valve1Timer.check())
+          
+          if (sprinkler.bValve1On && (sprinkler.valve1Timer.check() || isForceStop))
           {
             publishDebug("Stopping Zone 2");
             publish(PUB_STATE, "Zone 2 done");
@@ -313,29 +321,7 @@ void loop()
             setValve(-1);
           }  
         }
-        
-      }
-
-		}
-	}
-
- 
-  yield();
-  delay(500);
-  
-  //if deep sleep enabled and nothing left to water, and 10+ sec elapsed since start, goto deep sleep
-  if (sprinkler.bEnableDeepSleep && (sprinkler.valvesLeft <= 0) && loopTimer.check())
-  {
-    //publishDebug("Sleeping...");
-    publish(PUB_STATE, "Sleeping...");
-    ESP.deepSleep(sprinkler.deepSleep_sec * 1000 * 1000);  //in usec
-  }
-  else
-  {
-    delay (1000);
-  }
 }
-
 
 
 //MQTT callback
@@ -403,6 +389,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
       {
         sprinkler.bValve0En = false;;
     		publishDebug("Config: Zone 1 disabled");
+        
+        //check if watering cycle is running, and force stop this zone
+        checkAndStopValves(true);
     	}
     }
     else if(topicStr.equals(CTRL_ZONE1_DURATION))
@@ -440,6 +429,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
     	else if(newPayload[0] == '0'){
         sprinkler.bValve1En = false;;
     		publishDebug("Config: Zone 2 disabled");
+        
+        //check if watering cycle is running, and force stop this zone
+        checkAndStopValves(true);
     	}
     }
     else if(topicStr.equals(CTRL_ZONE2_DURATION))
@@ -553,6 +545,53 @@ bool getHumidityTempF(float *humidity, float * ftemp)
 }
 
 
+void getAndPublishSensorInfo()
+{
+  String postStr;
+  char postBuff[CBUF_SZ];
+  float vbatt, humidity, ctemp, ftemp;
+
+  //get temp info
+#ifndef ESP8266        
+  if (!getHumidityTempF(&humidity, &ftemp) )
+#else          
+  if (true)
+#endif          
+  {
+    publishDebug("Failed to read from DHT sensor!");
+  }
+  else
+  {
+    ctemp = dht.convertFtoC(ftemp);
+    postStr = "Humidity (%): ";
+    postStr += humidity;
+    postStr += " Temp (C): ";
+    postStr += ctemp;
+    postStr += " Temp (F): ";
+    postStr += ftemp;
+    postStr.toCharArray(postBuff, CBUF_SZ);
+    publishDebug(postBuff);
+    
+    dtostrf(humidity, 10, 2, postBuff);
+    publish(PUB_HUMIDITY, postBuff);
+    dtostrf(ctemp, 10, 2, postBuff);
+    publish(PUB_CTEMP, postBuff);
+    dtostrf(ftemp, 10, 2, postBuff);
+    publish(PUB_FTEMP, postBuff);
+  }
+  
+  //get battery voltage
+  vbatt = getVbatt();
+  postStr = "Battery voltage (V): ";
+  postStr += vbatt;
+  postStr.toCharArray(postBuff, CBUF_SZ);
+  publishDebug(postBuff);
+  
+  dtostrf(vbatt, 10, 3, postBuff);
+  publish(PUB_VBATT, postBuff);
+
+}
+
 
 //publish to topic & dump to serial
 void publish(const char* topic, const char* text){
@@ -565,7 +604,7 @@ void publish(const char* topic, const char* text){
 
 
 
-//take a char* and use it as a message
+//Dump to debug topic and serial
 void publishDebug(const char* text)
 {
   String pubString = String(HOSTNAME);
