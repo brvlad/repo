@@ -320,6 +320,9 @@ void loop()
 	}
 
  
+  yield();
+  delay(500);
+  
   //if deep sleep enabled and nothing left to water, and 10+ sec elapsed since start, goto deep sleep
   if (sprinkler.bEnableDeepSleep && (sprinkler.valvesLeft <= 0) && loopTimer.check())
   {
@@ -469,6 +472,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     //TODO: crappy way, can count same twice
     if (ctrl_msg_cnt >= CTRL_NUM_MESSAGES)
     {
+      publishDebug("Initialized");
       publish(PUB_STATE, "Initialized");
       sprinkler.isInitDone = true;
     }
