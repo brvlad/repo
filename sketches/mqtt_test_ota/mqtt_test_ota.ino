@@ -34,7 +34,8 @@ netInfo homeNet = {  .mqttHost = RPI_MQTT_IP,      //can be blank if not using M
           .pass = myPASSWORD};
 ESPHelper myESP(&homeNet);
 
-const char* HOSTNAME = "esp_test";
+//const char* HOSTNAME = "esp_test_d1";
+const char* HOSTNAME = "esp_test-01";
 
 #define TEST_TOPIC_BASE "hata/temp/test/"
 #define OUT_TOPIC  TEST_TOPIC_BASE "output/"
@@ -47,9 +48,10 @@ const char* HOSTNAME = "esp_test";
 
 #define CTL_VAL1 "val1"
 #define CTL_VAL2 "val2"
+#define CTL_VAL3 "val3"
 
-//#define DEEP_SLEEP_EN
-#define DEEP_SLEEP_MS 5000
+#define DEEP_SLEEP_EN
+#define DEEP_SLEEP_MS 1000
 
 bool initDone = false;  
 
@@ -67,12 +69,14 @@ void setup() {
 	myESP.OTA_enable();
 	myESP.OTA_setPassword(OTA_PASS);
 	myESP.OTA_setHostnameWithVersion(HOSTNAME);
+  myESP.setHopping(false);
+  
   //subscribe to all subnodes
 	myESP.addSubscription(OUT_TOPIC "#");
   myESP.addSubscription(CTRL_TOPIC "#");
 	myESP.setMQTTCallback(callback);
   //TODO: remove if pin used
-  myESP.enableHeartbeat(BUILTIN_LED);
+  //myESP.enableHeartbeat(BUILTIN_LED);
 	myESP.begin();
 	
 }
@@ -92,7 +96,7 @@ void loop(){
     Serial.println("not set...");
   }
 	//Put application code here
-  delay (1000);
+  delay (500);
   if ( !configDone && (ctrl_val1 >= 0) && (ctrl_val2 >= 0))
   {
     configDone = true;
@@ -104,13 +108,14 @@ void loop(){
     configDone = true;
     Serial.println("### set on 2...");
   }
-  delay (1000);
+  //delay (1000);
 
 #ifdef DEEP_SLEEP_EN    
   if (configDone)
   {
+    delay (5000);
     publish(PUB_STATE, "...deep sleep...");
-    //ESP.deepSleep(DEEP_SLEEP_MS * 1000);
+    ESP.deepSleep(DEEP_SLEEP_MS * 1000);
   }
 #endif
 
@@ -166,6 +171,11 @@ void callback(char* topic, uint8_t* payload, unsigned int length)
           myESP.publish(PUB_ACK, message, true);
           Serial.println(printStr);
         }
+      }
+      else if(topicStr.endsWith(CTL_VAL3))
+      {
+          myESP.publish(PUB_ACK, newPayload, false);  
+          Serial.println(newPayload);    
       }
     }
 }
