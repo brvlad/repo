@@ -199,13 +199,9 @@ void loop()
   String postStr;
   char postBuff[CBUF_SZ];
   float vbatt, humidity, ctemp, ftemp;
-         
-  //publishDebug("looping...");
 
 	if(myESP.loop() >= WIFI_ONLY)
   {
-    //publishDebug(">= WIFI_ONLY");
-
 		//once we have a WiFi connection trigger some extra setup
 		if(!initDone){
 				initDone = true;
@@ -216,20 +212,18 @@ void loop()
         publish(PUB_STATE, "Started");
 		}
 		else if(initDone)
-    {
-      
-      //publishDebug("Init done");
-  
+    {  
       //log once for deep sleep or every 60 seconds for normal mode
       if (bisFirstRun || measureTimer.check())
-      {
-        publishDebug("got here");
-        
+      {        
         bisFirstRun = false;
         measureTimer.reset();
         //get temp info
-        //if (!getHumidityTempF(&humidity, &ftemp) )
+#ifndef ESP8266        
+        if (!getHumidityTempF(&humidity, &ftemp) )
+#else          
         if (true)
+#endif          
         {
           publishDebug("Failed to read from DHT sensor!");
         }
@@ -397,12 +391,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
     else if(topicStr.equals(CTRL_ZONE1_ACTIVE))
     {
       ctrl_msg_cnt++;
-      sprinkler.valvesLeft++;
-    	if(newPayload[0] == '1'){
+    	if(newPayload[0] == '1')
+      {
         sprinkler.bValve0En = true;
+        sprinkler.valvesLeft++;
     		publishDebug("Config: Zone 1 enabled");
     	}
-    	else if(newPayload[0] == '0'){
+    	else if(newPayload[0] == '0')
+      {
         sprinkler.bValve0En = false;;
     		publishDebug("Config: Zone 1 disabled");
     	}
@@ -434,9 +430,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
     else if(topicStr.equals(CTRL_ZONE2_ACTIVE))
     {
       ctrl_msg_cnt++;
-      sprinkler.valvesLeft++;
     	if(newPayload[0] == '1'){
         sprinkler.bValve1En = true;
+        sprinkler.valvesLeft++;
     		publishDebug("Config: Zone 2 enabled");
     	}
     	else if(newPayload[0] == '0'){
