@@ -326,13 +326,12 @@ void loop()
   //if deep sleep enabled and nothing left to water, and 10+ sec elapsed since start, goto deep sleep
   if (sprinkler.bEnableDeepSleep && (sprinkler.valvesLeft <= 0) && loopTimer.check())
   {
-    publishDebug("Sleeping...");
+    //publishDebug("Sleeping...");
     publish(PUB_STATE, "Sleeping...");
     ESP.deepSleep(sprinkler.deepSleep_sec * 1000 * 1000);  //in usec
   }
   else
   {
-    //publishDebug("Waiting");
     delay (1000);
   }
 }
