@@ -24,6 +24,15 @@
 #include <credentials.h>
 #include "DHT.h"
 
+
+//some bogus definitions
+#ifdef ESP8266
+#define D0 BUILTIN_LED
+#define D1 BUILTIN_LED
+#define D2 BUILTIN_LED
+#define D4 BUILTIN_LED
+#endif
+
 // Uncomment whatever DHT type you're using!
 #define DHTTYPE DHT11  // DHT 11
 #define DHTPIN D4     // what pin we're connected to
@@ -66,20 +75,28 @@ const unsigned long NUM_SPRINKLERS = 2;
 #define PUB_HUMIDITY  OUT_TOPIC "humidity"
 
 //config topic nodes
+#define CTRL_DEEP_SLEEP_EN CTRL_TOPIC "deep_sleep_en"
 #define CTRL_DEEP_SLEEP_SEC CTRL_TOPIC "deep_sleep_sec"
+#define CTRL_ZONE1_ACTIVE CTRL_TOPIC "zone1_on"
+#define CTRL_ZONE2_ACTIVE CTRL_TOPIC "zone2_on"
 #define CTRL_ZONE1_DURATION CTRL_TOPIC "zone1_duration_min"
 #define CTRL_ZONE2_DURATION CTRL_TOPIC "zone2_duration_min"
 //#define CTRL_CUR_TIME   "time_val"
 #define CTRL_NUM_MESSAGES   6       //how many ctrl settings need to be received
 
  
-struct Sprinkler
-{
+struct Sprinkler{
+  bool isInitDone = false;
+  //bEnableDeepSleep is cleared when deep sleep is disabled 
+  bool bEnableDeepSleep = false;
   int deepSleep_sec = -1;
+  //enable flag per valve
+  bool bValve0En = 0;
+  bool bValve1En = 0;
   //valve status
   bool bValve0On = 0;
   bool bValve1On = 0;
-  //watering duration per valve (>0 if enabled)
+  //watering duration per valve
   int valve0EnMin = -1;
   int valve1EnMin = -1;
   //valves left to water
@@ -134,9 +151,11 @@ void setup()
 	pinMode(relay2, OUTPUT);
 	delay(100);
 	setValve(-1);	//init to valves off
-      
+
+#ifndef ESP8266  
   //Connect D0 to RST to wake up from deep sleep
   pinMode(D0, WAKEUP_PULLUP);
+#endif
   
   //start DHT temp/humidity sensor
   dht.begin();
@@ -151,18 +170,25 @@ void setup()
 	myESP.OTA_setHostname(HOSTNAME);
 
   //control topics settings
+  myESP.addSubscription(CTRL_DEEP_SLEEP_EN);
 	myESP.addSubscription(CTRL_DEEP_SLEEP_SEC);
+  myESP.addSubscription(CTRL_ZONE1_ACTIVE);
+	myESP.addSubscription(CTRL_ZONE2_ACTIVE);
   myESP.addSubscription(CTRL_ZONE1_DURATION);
 	myESP.addSubscription(CTRL_ZONE2_DURATION);
 
   //output topics
-	myESP.addSubscription(PUB_DEBUG);
+	/*myESP.addSubscription(PUB_DEBUG);
 	myESP.addSubscription(PUB_STATE);
 	myESP.addSubscription(PUB_VBATT);
 	myESP.addSubscription(PUB_CTEMP);
 	myESP.addSubscription(PUB_FTEMP);
 	myESP.addSubscription(PUB_HUMIDITY);
+*/
 
+#ifdef ESP8266 
+  myESP.enableHeartbeat(BUILTIN_LED);
+#endif
 	myESP.setCallback(callback);
 	myESP.begin();		//start ESPHelper
 }
@@ -174,7 +200,11 @@ void loop()
   char postBuff[CBUF_SZ];
   float vbatt, humidity, ctemp, ftemp;
          
-	if(myESP.loop() >= WIFI_ONLY){
+  //publishDebug("looping...");
+
+	if(myESP.loop() >= WIFI_ONLY)
+  {
+    //publishDebug(">= WIFI_ONLY");
 
 		//once we have a WiFi connection trigger some extra setup
 		if(!initDone){
@@ -185,16 +215,21 @@ void loop()
 				publishDebug("Watering System Started");
         publish(PUB_STATE, "Started");
 		}
-
-		if(initDone)
+		else if(initDone)
     {
+      
+      //publishDebug("Init done");
+  
       //log once for deep sleep or every 60 seconds for normal mode
       if (bisFirstRun || measureTimer.check())
       {
+        publishDebug("got here");
+        
         bisFirstRun = false;
         measureTimer.reset();
         //get temp info
-        if (!getHumidityTempF(&humidity, &ftemp) )
+        //if (!getHumidityTempF(&humidity, &ftemp) )
+        if (true)
         {
           publishDebug("Failed to read from DHT sensor!");
         }
@@ -230,38 +265,34 @@ void loop()
       }
 
       //if got all control topic settings, check what to do
-      if (sprinkler.isInitialized())
+      if (sprinkler.isInitDone)
       {
-        publish(PUB_STATE, "Initialized");
-        
         //now check if can start watering
-        if (sprinkler.valve0EnMin && !isCycleRunning)
+        if (sprinkler.bValve0En && !isCycleRunning)
         {
           publishDebug("Starting Zone 1");
           publish(PUB_STATE, "Zone 1 watering");
           
+          sprinkler.bValve0En = false;    //clear En flag to not start cycle again
+          sprinkler.bValve0On = true;
+          isCycleRunning = true;
           //set duration and reset timer
           sprinkler.valve0Timer.interval(sprinkler.valve0EnMin * MINUTE);
           sprinkler.valve0Timer.reset();
-          sprinkler.valve0EnMin = 0;    //clear En flag to not start cycle again
-          sprinkler.bValve0On = true;
-          isCycleRunning = true;
-
           //open valve 0
           setValve(0);    
         }
-        else if( sprinkler.valve1EnMin && !isCycleRunning)
+        else if( sprinkler.bValve1En && !isCycleRunning)
         {
           publishDebug("Starting Zone 2");
           publish(PUB_STATE, "Zone 2 watering");
           
+          sprinkler.bValve1En = false;    //clear En flag to not start cycle again
+          sprinkler.bValve1On = true;
+          isCycleRunning = true;
           //set duration and reset timer
           sprinkler.valve1Timer.interval(sprinkler.valve1EnMin * MINUTE);
           sprinkler.valve1Timer.reset();
-          sprinkler.valve1EnMin = 0;    //clear En flag to not start cycle again
-          sprinkler.bValve1On = true;
-          isCycleRunning = true;
-
           //open valve 1
           setValve(1);    
         }
@@ -294,19 +325,18 @@ void loop()
 		}
 	}
 
-  //yield for callbacks/etc
-  yield();
-  
+ 
   //if deep sleep enabled and nothing left to water, and 10+ sec elapsed since start, goto deep sleep
-  if ((sprinkler.deepSleep_sec > 0) && (sprinkler.valvesLeft <= 0) && loopTimer.check())
+  if (sprinkler.bEnableDeepSleep && (sprinkler.valvesLeft <= 0) && loopTimer.check())
   {
-    ESP.deepSleep(sprinkler.deepSleep_sec * 1000 * 1000);  //in usec
-    publishDebug("Deep sleep right meow...");
+    publishDebug("Sleeping...");
     publish(PUB_STATE, "Sleeping...");
+    ESP.deepSleep(sprinkler.deepSleep_sec * 1000 * 1000);  //in usec
   }
   else
   {
-    delay (500);
+    //publishDebug("Waiting");
+    delay (1000);
   }
 }
 
@@ -326,8 +356,27 @@ void callback(char* topic, byte* payload, unsigned int length) {
     memcpy(newPayload, payload, length);
     newPayload[length] = '\0';
     
-    if(topicStr.equals(CTRL_DEEP_SLEEP_SEC))
+    
+    publishDebug(topic);
+
+            
+    if(topicStr.equals(CTRL_DEEP_SLEEP_EN))
     {
+      ctrl_msg_cnt++;
+      
+    	if(newPayload[0] == '0'){
+    		//set debug flag
+        sprinkler.bEnableDeepSleep = false;
+    		publishDebug("Config: Deep sleep OFF");
+    	}
+    	else if(newPayload[0] == '1'){
+        sprinkler.bEnableDeepSleep = true;
+    		publishDebug("Config: Deep sleep ON");
+    	}
+    }
+    else if(topicStr.equals(CTRL_DEEP_SLEEP_SEC))
+    {
+        ctrl_msg_cnt++;
         num = atoi(newPayload);
         if (isnan (num))
         {
@@ -339,12 +388,24 @@ void callback(char* topic, byte* payload, unsigned int length) {
         else
         {
           sprinkler.deepSleep_sec = num;
-          publishDebug("Config: Deep sleep ON");
           printStr = "Deep sleep duration (sec): ";
           printStr += num;
           printStr.toCharArray(printBuff, CBUF_SZ);
           publishDebug(printBuff);
         }
+    }
+    else if(topicStr.equals(CTRL_ZONE1_ACTIVE))
+    {
+      ctrl_msg_cnt++;
+      sprinkler.valvesLeft++;
+    	if(newPayload[0] == '1'){
+        sprinkler.bValve0En = true;
+    		publishDebug("Config: Zone 1 enabled");
+    	}
+    	else if(newPayload[0] == '0'){
+        sprinkler.bValve0En = false;;
+    		publishDebug("Config: Zone 1 disabled");
+    	}
     }
     else if(topicStr.equals(CTRL_ZONE1_DURATION))
     {
@@ -370,6 +431,19 @@ void callback(char* topic, byte* payload, unsigned int length) {
           publishDebug(printBuff);
         }    
     }
+    else if(topicStr.equals(CTRL_ZONE2_ACTIVE))
+    {
+      ctrl_msg_cnt++;
+      sprinkler.valvesLeft++;
+    	if(newPayload[0] == '1'){
+        sprinkler.bValve1En = true;
+    		publishDebug("Config: Zone 2 enabled");
+    	}
+    	else if(newPayload[0] == '0'){
+        sprinkler.bValve1En = false;;
+    		publishDebug("Config: Zone 2 disabled");
+    	}
+    }
     else if(topicStr.equals(CTRL_ZONE2_DURATION))
     {
         ctrl_msg_cnt++;
@@ -393,6 +467,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
           printStr.toCharArray(printBuff, CBUF_SZ);
           publishDebug(printBuff);
         }    
+    }
+    
+    //if got all ctrl messages, set init done
+    //TODO: crappy way, can count same twice
+    if (ctrl_msg_cnt >= CTRL_NUM_MESSAGES)
+    {
+      publish(PUB_STATE, "Initialized");
+      sprinkler.isInitDone = true;
     }
 }
 
