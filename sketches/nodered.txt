@@ -15,8 +15,8 @@
         "qos": "2",
         "retain": "true",
         "broker": "15ed38db.fc1a27",
-        "x": 711.100019454956,
-        "y": 169.6000461578369,
+        "x": 727.1000709533691,
+        "y": 170.60005378723145,
         "wires": []
     },
     {
@@ -99,8 +99,8 @@
         "active": false,
         "console": "false",
         "complete": "true",
-        "x": 369.1000099182129,
-        "y": 720.8001265525818,
+        "x": 501.1000671386719,
+        "y": 400.80010986328125,
         "wires": []
     },
     {
@@ -141,8 +141,8 @@
         "qos": "2",
         "retain": "true",
         "broker": "15ed38db.fc1a27",
-        "x": 740.6001663208008,
-        "y": 746.000078201294,
+        "x": 865.6001815795898,
+        "y": 423.00007581710815,
         "wires": []
     },
     {
@@ -194,11 +194,11 @@
         "type": "debug",
         "z": "843f1567.7384e8",
         "name": "",
-        "active": true,
+        "active": false,
         "console": "false",
         "complete": "false",
-        "x": 732.0003662109375,
-        "y": 917.0000896453857,
+        "x": 848.000373840332,
+        "y": 902.0000796318054,
         "wires": []
     },
     {
@@ -210,8 +210,8 @@
         "qos": "2",
         "retain": "true",
         "broker": "15ed38db.fc1a27",
-        "x": 754.0002031326294,
-        "y": 976.2002382278442,
+        "x": 870.0002107620239,
+        "y": 961.2002282142639,
         "wires": []
     },
     {
@@ -223,8 +223,8 @@
         "qos": "2",
         "retain": "true",
         "broker": "15ed38db.fc1a27",
-        "x": 714.1001663208008,
-        "y": 452.0000476837158,
+        "x": 714.1001892089844,
+        "y": 679.0000591278076,
         "wires": []
     },
     {
@@ -235,8 +235,8 @@
         "active": false,
         "console": "false",
         "complete": "false",
-        "x": 718.1002655029297,
-        "y": 501.0000810623169,
+        "x": 718.1002883911133,
+        "y": 728.0000925064087,
         "wires": []
     },
     {
@@ -247,8 +247,8 @@
         "func": "msg.payload = msg.state\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 725.1002655029297,
-        "y": 553.2001008987427,
+        "x": 725.1002883911133,
+        "y": 780.2001123428345,
         "wires": [
             [
                 "7580f6ab.00df48"
@@ -396,8 +396,8 @@
         "active": false,
         "console": "false",
         "complete": "false",
-        "x": 708.5001182556152,
-        "y": 797.2001299858093,
+        "x": 833.5001335144043,
+        "y": 474.20012760162354,
         "wires": []
     },
     {
@@ -408,8 +408,8 @@
         "func": "flow.set(\"var_zone1_duration_min\", msg.payload);\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 383.0000114440918,
-        "y": 797.200129032135,
+        "x": 508.00002670288086,
+        "y": 474.2001266479492,
         "wires": [
             [
                 "c2919db0.ff7ea"
@@ -424,8 +424,8 @@
         "func": "flow.set(\"var_zone2_duration_min\", msg.payload);\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 409.0001220703125,
-        "y": 983.1999959945679,
+        "x": 525.000129699707,
+        "y": 968.1999859809875,
         "wires": [
             [
                 "8dad2898.7dcaf8"
@@ -440,8 +440,8 @@
         "active": false,
         "console": "false",
         "complete": "true",
-        "x": 423.0001106262207,
-        "y": 940.1999931335449,
+        "x": 539.0001182556152,
+        "y": 925.1999831199646,
         "wires": []
     },
     {
@@ -536,8 +536,8 @@
         "payload": "0",
         "payloadType": "str",
         "topic": "",
-        "x": 152.00008583068848,
-        "y": 519.3999824523926,
+        "x": 152.00010871887207,
+        "y": 746.3999938964844,
         "wires": [
             [
                 "4c8ef2ec.3ed94c"
@@ -561,8 +561,8 @@
         "payload": "1",
         "payloadType": "str",
         "topic": "",
-        "x": 152.1000747680664,
-        "y": 479.20001125335693,
+        "x": 152.10009765625,
+        "y": 706.2000226974487,
         "wires": [
             [
                 "4c8ef2ec.3ed94c"
@@ -586,8 +586,8 @@
         "payload": "auto",
         "payloadType": "str",
         "topic": "",
-        "x": 151.0000991821289,
-        "y": 559.3999843597412,
+        "x": 151.0001220703125,
+        "y": 786.399995803833,
         "wires": [
             [
                 "4c8ef2ec.3ed94c"
@@ -611,8 +611,8 @@
         "payload": "var_zone1_duration_min",
         "payloadType": "flow",
         "topic": "",
-        "x": 530.0000267028809,
-        "y": 796.200089931488,
+        "x": 655.0000419616699,
+        "y": 473.20008754730225,
         "wires": [
             [
                 "f0c7e7eb.0188c8",
@@ -637,8 +637,8 @@
         "payload": "var_zone2_duration_min",
         "payloadType": "flow",
         "topic": "",
-        "x": 565.0001640319824,
-        "y": 962.1999940872192,
+        "x": 681.000171661377,
+        "y": 947.1999840736389,
         "wires": [
             [
                 "9b60dd96.f8a6d",
@@ -687,13 +687,13 @@
         "order": 7,
         "width": "5",
         "height": "1",
-        "passthru": false,
+        "passthru": true,
         "topic": "",
         "min": 0,
         "max": "60",
         "step": "2",
-        "x": 156.00001525878906,
-        "y": 775.400101184845,
+        "x": 281.0000305175781,
+        "y": 452.4000988006592,
         "wires": [
             [
                 "6e5f46d7.faa698",
@@ -717,8 +717,8 @@
         "min": 0,
         "max": "60",
         "step": 1,
-        "x": 156.00018310546875,
-        "y": 952.0001120567322,
+        "x": 272.0001907348633,
+        "y": 937.0001020431519,
         "wires": [
             [
                 "778f7efe.3c66b",
@@ -780,8 +780,8 @@
         "label": "Zone 2 duration minutes",
         "format": "{{msg.payload}}",
         "layout": "row-spread",
-        "x": 448.10023498535156,
-        "y": 904.0000896453857,
+        "x": 564.1002426147461,
+        "y": 889.0000796318054,
         "wires": []
     },
     {
@@ -796,8 +796,8 @@
         "label": "Zone 1 duration minutes",
         "format": "{{msg.payload}}",
         "layout": "row-spread",
-        "x": 432.10008239746094,
-        "y": 760.0000777244568,
+        "x": 557.10009765625,
+        "y": 437.000075340271,
         "wires": []
     },
     {
@@ -828,8 +828,8 @@
         "label": "Zone2 status",
         "format": "{{msg.payload}}",
         "layout": "row-spread",
-        "x": 908.1003036499023,
-        "y": 552.8000545501709,
+        "x": 911.1004409790039,
+        "y": 779.8000888824463,
         "wires": []
     },
     {
@@ -936,7 +936,7 @@
         "name": "Zone 1 scheduler",
         "lat": "32.854749",
         "lon": "-117.204547",
-        "starttime": "720",
+        "starttime": "1080",
         "endtime": "10015",
         "startoff": 0,
         "endoff": "0",
@@ -1013,7 +1013,7 @@
         "name": "Zone 2 scheduler",
         "lat": "32.854749",
         "lon": "-117.204547",
-        "starttime": "1020",
+        "starttime": "1080",
         "endtime": "10015",
         "startoff": 0,
         "endoff": "0",
@@ -1066,8 +1066,8 @@
         "atstart": true,
         "odd": false,
         "even": false,
-        "x": 527.1000900268555,
-        "y": 500.70000648498535,
+        "x": 527.1001129150391,
+        "y": 727.7000179290771,
         "wires": [
             [
                 "e5af720a.f1dfc",
@@ -1104,8 +1104,8 @@
         "func": "msg.topic=\"\"\nif (parseInt(msg.payload) < 10)\n    msg.payload = \"off_override 1000\"+msg.payload\nelse\n    msg.payload = \"off_override 100\"+msg.payload\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 343.40003204345703,
-        "y": 309.0000333786011,
+        "x": 360.40003204345703,
+        "y": 305.00002098083496,
         "wires": [
             [
                 "c826fffd.bec5a",
@@ -1142,33 +1142,11 @@
         ]
     },
     {
-        "id": "32d85228.6c168e",
-        "type": "ui_text_input",
-        "z": "843f1567.7384e8",
-        "name": "",
-        "label": "",
-        "group": "2c8473a5.d0af6c",
-        "order": 0,
-        "width": 0,
-        "height": 0,
-        "passthru": true,
-        "mode": "text",
-        "delay": 300,
-        "topic": "",
-        "x": 153.00001525878906,
-        "y": 152.20001697540283,
-        "wires": [
-            [
-                "5da5b6b5.63c228"
-            ]
-        ]
-    },
-    {
         "id": "2011b421.5eeacc",
         "type": "debug",
         "z": "843f1567.7384e8",
         "name": "",
-        "active": false,
+        "active": true,
         "console": "false",
         "complete": "true",
         "x": 722.3999767303467,
@@ -1189,8 +1167,8 @@
         "mode": "text",
         "delay": 300,
         "topic": "",
-        "x": 146.0000877380371,
-        "y": 441.0000524520874,
+        "x": 146.0001106262207,
+        "y": 668.0000638961792,
         "wires": [
             [
                 "4761ab8a.4f1e24"
@@ -1205,8 +1183,8 @@
         "func": "msg.payload = \"on_override \"+msg.payload\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 321.9000701904297,
-        "y": 443.80000495910645,
+        "x": 321.9000930786133,
+        "y": 670.8000164031982,
         "wires": [
             [
                 "4c8ef2ec.3ed94c"
@@ -1221,8 +1199,8 @@
         "active": false,
         "console": "false",
         "complete": "true",
-        "x": 893.0000991821289,
-        "y": 468.0000047683716,
+        "x": 893.0001449584961,
+        "y": 695.0000190734863,
         "wires": []
     },
     {
@@ -1233,11 +1211,12 @@
         "topic": "hata/temp/watering/config/zone1_duration_min",
         "qos": "2",
         "broker": "15ed38db.fc1a27",
-        "x": 144,
-        "y": 309.00000953674316,
+        "x": 140.00000762939453,
+        "y": 326.99999809265137,
         "wires": [
             [
-                "dd287c3.d3cdb8"
+                "dd287c3.d3cdb8",
+                "e9df79e9.e3aa38"
             ]
         ]
     },
@@ -1249,8 +1228,8 @@
         "func": "msg.topic=\"\"\nif (parseInt(msg.payload) < 10)\n    msg.payload = \"off_override 1000\"+msg.payload\nelse\n    msg.payload = \"off_override 100\"+msg.payload\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
-        "x": 349.0000648498535,
-        "y": 582.399998664856,
+        "x": 349.0000877380371,
+        "y": 809.4000101089478,
         "wires": [
             [
                 "4c8ef2ec.3ed94c"
@@ -1265,11 +1244,36 @@
         "topic": "hata/temp/watering/config/zone2_duration_min",
         "qos": "2",
         "broker": "15ed38db.fc1a27",
-        "x": 146.60003662109375,
-        "y": 613.4000186920166,
+        "x": 146.60005950927734,
+        "y": 840.4000301361084,
         "wires": [
             [
-                "ca06085c.d468a8"
+                "ca06085c.d468a8",
+                "21cca37.a48545c"
+            ]
+        ]
+    },
+    {
+        "id": "a0bd5796.933c38",
+        "type": "ui_numeric",
+        "z": "843f1567.7384e8",
+        "name": "",
+        "label": "numeric",
+        "group": "2c8473a5.d0af6c",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "topic": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "x": 99.10000610351562,
+        "y": 155.40000915527344,
+        "wires": [
+            [
+                "5da5b6b5.63c228"
             ]
         ]
     },

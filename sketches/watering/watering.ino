@@ -25,18 +25,19 @@
 #include "DHT.h"
 
 
+#define DEBUG_VER
+
 //some bogus definitions
-#ifdef ESP8266
+#ifndef ARDUINO_ESP8266_WEMOS_D1MINI
 #define D0 BUILTIN_LED
 #define D1 BUILTIN_LED
 #define D2 BUILTIN_LED
 #define D4 BUILTIN_LED
 #endif
 
-// Uncomment whatever DHT type you're using!
 #define DHTTYPE DHT11  // DHT 11
 #define DHTPIN D4     // what pin we're connected to
- 
+
 DHT dht(DHTPIN, DHTTYPE);
 
 #define CBUF_SZ 256  //char buffer size for posting MQTT
@@ -52,8 +53,6 @@ const int relay2 = D1;
 
 //consts for the timers for a cycle and section
 const unsigned long NUM_SPRINKLERS = 2;
-
-#define DEBUG_VER
 
 #ifdef DEBUG_VER
   #define WATERING_TOPIC_BASE "hata/temp/watering/"
@@ -81,18 +80,16 @@ const unsigned long NUM_SPRINKLERS = 2;
 #define CTRL_ZONE2_ACTIVE CTRL_TOPIC "zone2_on"
 #define CTRL_ZONE1_DURATION CTRL_TOPIC "zone1_duration_min"
 #define CTRL_ZONE2_DURATION CTRL_TOPIC "zone2_duration_min"
-//#define CTRL_CUR_TIME   "time_val"
 #define CTRL_NUM_MESSAGES   6       //how many ctrl settings need to be received
 
  
 struct Sprinkler{
-  bool isInitDone = false;
   //bEnableDeepSleep is cleared when deep sleep is disabled 
-  bool bEnableDeepSleep = false;
+  int bEnableDeepSleep = -1;
   int deepSleep_sec = -1;
   //enable flag per valve
-  bool bValve0En = 0;
-  bool bValve1En = 0;
+  int bValve0En = -1;
+  int bValve1En = -1;
   //valve status
   bool bValve0On = 0;
   bool bValve1On = 0;
@@ -111,7 +108,8 @@ struct Sprinkler{
   
   bool isInitialized()
   {
-    if ( (deepSleep_sec >=0) && (valve0EnMin >=0) && (valve1EnMin >=0))
+    if ( (bEnableDeepSleep >=0) && (bValve0En >=0) && (bValve1En >=0) &&
+        (deepSleep_sec >=0) && (valve0EnMin >=0) && (valve1EnMin >=0))
     {
       return true;
     }
@@ -125,11 +123,7 @@ Sprinkler sprinkler;
 
 //isCycleRunning tells the system that a cycle is running 
 bool isCycleRunning = false;
-bool initDone  = false;
-//bisFirstRun is cleared when loop runs in initDone section
-bool bisFirstRun = true;
-//keep track of control message count from broker
-int ctrl_msg_cnt = 0;
+
 //timers for various watering functions
 Metro measureTimer = Metro(MINUTE);
 Metro loopTimer = Metro(10 * SECOND);
@@ -152,7 +146,7 @@ void setup()
 	delay(100);
 	setValve(-1);	//init to valves off
 
-#ifndef ESP8266  
+#ifdef ARDUINO_ESP8266_WEMOS_D1MINI  
   //Connect D0 to RST to wake up from deep sleep
   pinMode(D0, WAKEUP_PULLUP);
 #endif
@@ -177,16 +171,7 @@ void setup()
   myESP.addSubscription(CTRL_ZONE1_DURATION);
 	myESP.addSubscription(CTRL_ZONE2_DURATION);
 
-  //output topics
-	/*myESP.addSubscription(PUB_DEBUG);
-	myESP.addSubscription(PUB_STATE);
-	myESP.addSubscription(PUB_VBATT);
-	myESP.addSubscription(PUB_CTEMP);
-	myESP.addSubscription(PUB_FTEMP);
-	myESP.addSubscription(PUB_HUMIDITY);
-*/
-
-#ifdef ESP8266 
+#ifndef ARDUINO_ESP8266_WEMOS_D1MINI 
   myESP.enableHeartbeat(BUILTIN_LED);
 #endif
 	myESP.setCallback(callback);
@@ -196,6 +181,11 @@ void setup()
 
 void loop()
 {
+  static bool initDone  = false;
+  //bisFirstRun is cleared when loop runs in initDone section
+  static bool bisFirstRun = true;
+  //flag to only post init message once
+  static bool  isInitPosted = false;
 
 	if(myESP.loop() >= WIFI_ONLY)
   {
@@ -223,8 +213,14 @@ void loop()
       }
       
       //if got all control topic settings, check what to do
-      if (sprinkler.isInitDone)
+      if (sprinkler.isInitialized())
       {
+        if (!isInitPosted)
+        {
+          publish(PUB_STATE, "Initialized");
+          isInitPosted = true;
+        }
+
         //check if should start watering
         checkAndStartValves();
         
@@ -237,7 +233,7 @@ void loop()
   yield();
   
   //if deep sleep enabled and nothing left to water, and 10+ sec elapsed since start, goto deep sleep
-  if (sprinkler.isInitDone && sprinkler.bEnableDeepSleep && (sprinkler.valvesLeft <= 0) && loopTimer.check())
+  if (sprinkler.isInitialized() && sprinkler.bEnableDeepSleep > 0 && (sprinkler.valvesLeft <= 0) && loopTimer.check())
   {
     publishDebug("Sleeping for (sec):" + sprinkler.deepSleep_sec);
     publish(PUB_STATE, "Sleeping...");
@@ -261,12 +257,12 @@ Check if watering should be started and open valves/update vars
 void checkAndStartValves()
 {
         //now check if can start watering
-        if (sprinkler.bValve0En && !isCycleRunning)
+        if (sprinkler.bValve0En >0 && !isCycleRunning)
         {
           publishDebug("Starting Zone 1");
           publish(PUB_STATE, "Zone 1 watering");
           
-          sprinkler.bValve0En = false;    //clear En flag to not start cycle again
+          sprinkler.bValve0En = 0;    //clear En flag to not start cycle again
           sprinkler.bValve0On = true;
           isCycleRunning = true;
           //set duration and reset timer
@@ -275,12 +271,12 @@ void checkAndStartValves()
           //open valve 0
           setValve(0);    
         }
-        else if( sprinkler.bValve1En && !isCycleRunning)
+        else if( sprinkler.bValve1En >0 && !isCycleRunning)
         {
           publishDebug("Starting Zone 2");
           publish(PUB_STATE, "Zone 2 watering");
           
-          sprinkler.bValve1En = false;    //clear En flag to not start cycle again
+          sprinkler.bValve1En = 0;    //clear En flag to not start cycle again
           sprinkler.bValve1On = true;
           isCycleRunning = true;
           //set duration and reset timer
@@ -345,21 +341,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
             
     if(topicStr.equals(CTRL_DEEP_SLEEP_EN))
     {
-      ctrl_msg_cnt++;
-      
     	if(newPayload[0] == '0'){
     		//set debug flag
-        sprinkler.bEnableDeepSleep = false;
+        sprinkler.bEnableDeepSleep = 0;
     		publishDebug("Config: Deep sleep OFF");
     	}
     	else if(newPayload[0] == '1'){
-        sprinkler.bEnableDeepSleep = true;
+        sprinkler.bEnableDeepSleep = 1;
     		publishDebug("Config: Deep sleep ON");
     	}
     }
     else if(topicStr.equals(CTRL_DEEP_SLEEP_SEC))
     {
-        ctrl_msg_cnt++;
         num = atoi(newPayload);
         if (isnan (num))
         {
@@ -379,16 +372,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     else if(topicStr.equals(CTRL_ZONE1_ACTIVE))
     {
-      ctrl_msg_cnt++;
     	if(newPayload[0] == '1')
       {
-        sprinkler.bValve0En = true;
+        sprinkler.bValve0En = 1;
         sprinkler.valvesLeft++;
     		publishDebug("Config: Zone 1 enabled");
     	}
     	else if(newPayload[0] == '0')
       {
-        sprinkler.bValve0En = false;;
+        sprinkler.bValve0En = 0;;
     		publishDebug("Config: Zone 1 disabled");
         
         //check if watering cycle is running, and force stop this zone
@@ -397,7 +389,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     else if(topicStr.equals(CTRL_ZONE1_DURATION))
     {
-        ctrl_msg_cnt++;
         num = atoi(newPayload);
         
         printStr = num;
@@ -421,14 +412,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     else if(topicStr.equals(CTRL_ZONE2_ACTIVE))
     {
-      ctrl_msg_cnt++;
-    	if(newPayload[0] == '1'){
-        sprinkler.bValve1En = true;
+    	if(newPayload[0] == '1')
+      {
+        sprinkler.bValve1En = 1;
         sprinkler.valvesLeft++;
     		publishDebug("Config: Zone 2 enabled");
     	}
-    	else if(newPayload[0] == '0'){
-        sprinkler.bValve1En = false;;
+    	else if(newPayload[0] == '0')
+      {
+        sprinkler.bValve1En = 0;;
     		publishDebug("Config: Zone 2 disabled");
         
         //check if watering cycle is running, and force stop this zone
@@ -437,7 +429,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     else if(topicStr.equals(CTRL_ZONE2_DURATION))
     {
-        ctrl_msg_cnt++;
         num = atoi(newPayload);
         
         printStr = num;
@@ -458,15 +449,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
           printStr.toCharArray(printBuff, CBUF_SZ);
           publishDebug(printBuff);
         }    
-    }
-    
-    //if got all ctrl messages, set init done
-    //TODO: crappy way, can count same twice
-    if (ctrl_msg_cnt >= CTRL_NUM_MESSAGES)
-    {
-      publishDebug("Initialized");
-      publish(PUB_STATE, "Initialized");
-      sprinkler.isInitDone = true;
     }
 }
 
@@ -553,7 +535,7 @@ void getAndPublishSensorInfo()
   float vbatt, humidity, ctemp, ftemp;
 
   //get temp info
-#ifndef ESP8266        
+#ifdef ARDUINO_ESP8266_WEMOS_D1MINI        
   if (!getHumidityTempF(&humidity, &ftemp) )
 #else          
   if (true)
@@ -598,7 +580,7 @@ void getAndPublishSensorInfo()
 void publish(const char* topic, const char* text){
 
   myESP.publish(topic, text, true);
-#ifdef USE_SERIAL
+#ifdef DEBUG_VER
   Serial.println(text);
 #endif    
 }
