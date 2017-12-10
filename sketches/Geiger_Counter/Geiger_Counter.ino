@@ -13,21 +13,20 @@
    Please use freely with attribution. Thank you!
 */
 
-//#include <WiFi.h>
-#include <ESP8266WiFi.h>
-#include <WiFiClientSecure.h>
+#include "ESPHelper.h"
+#include <credentials.h>
 #include <IFTTTMaker.h>
 
 #define WEMOS_OLED
 
+//using Adafruit_SSD1306-esp8266-64x48 lib for wemos OLED.
+//Adafruit_SSD1306_master don't work...
 #ifndef WEMOS_OLED
 #include <SSD1306.h>
 #else
 #include <Adafruit_SSD1306.h>
 #endif
 
-
-#include <credentials.h> // or define mySSID and myPASSWORD and THINGSPEAK_API_KEY
 
 #define LOG_PERIOD 20000 //Logging period in milliseconds
 #define MINUTE_PERIOD 60000
@@ -37,6 +36,16 @@
 // IFTTT
 #define EVENT_NAME "RadioactivityCPM" // Name of your event name, set when you are creating the applet
 
+#define GEIGER_TOPIC_BASE "hata/geiger/"
+const char* HOSTNAME = "esp_geiger";  
+
+#define OUT_TOPIC  GEIGER_TOPIC_BASE "output/"
+//output topic nodes
+#define PUB_DEBUG  OUT_TOPIC "debug"
+#define PUB_GEIGER OUT_TOPIC "cpm"
+
+#define CBUF_SZ 256  //char buffer size for posting MQTT
+
 // ThingSpeak Settings
 const int channelID = THINGSPEAK_CHANNEL_ID;
 const char* thingspeak_server = "api.thingspeak.com";
@@ -44,6 +53,15 @@ const char* thingspeak_server = "api.thingspeak.com";
 WiFiClient client;
 WiFiClientSecure secure_client;
 IFTTTMaker ifttt(IFTTT_KEY, secure_client);
+
+netInfo homeNet = {	.mqttHost = RPI_MQTT_IP,			//can be blank if not using MQTT
+					.mqttUser = "", 	//can be blank
+					.mqttPass = "", 	//can be blank
+					.mqttPort = 1883,					//default port for MQTT is 1883 - only chance if needed.
+					.ssid = mySSID, 
+					.pass = myPASSWORD};
+ESPHelper myESP(&homeNet);
+
 
 volatile unsigned long counts = 0;                       // Tube events
 unsigned long cpm = 0;                                   // CPM
@@ -66,21 +84,19 @@ void ISR_impulse() { // Captures count of events from Geiger counter board
   counts++;
 }
 
-void setup() {
+void setup() 
+{
   Serial.begin(115200);
   
   displayInit();
   //displayString("Welcome", 64, 15);
   Serial.println("Connecting to Wi-Fi");
 
-  WiFi.begin(mySSID, myPASSWORD);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
-  }
-  Serial.println();
-  Serial.println("Wi-Fi Connected @: " + WiFi.localIP());
+  //setup ESPHelper
+	myESP.OTA_enable();
+	myESP.OTA_setPassword(OTA_PASS);
+	myESP.OTA_setHostname(HOSTNAME);
+	myESP.begin();		//start ESPHelper
   
   // Clear the buffer.
   display.clearDisplay();
@@ -101,7 +117,11 @@ void setup() {
 
 void loop() {
   unsigned long currentMillis = millis();
+  char postBuff[CBUF_SZ];
+  String postStr;
 
+  myESP.loop();   //run wifi accounting
+  
   if (currentMillis - previousMillis > LOG_PERIOD) {
     previousMillis = currentMillis;
     cpm = counts * MINUTE_PERIOD / LOG_PERIOD;
@@ -124,9 +144,19 @@ void loop() {
     Serial.print("Radioactivity (CPM): ");
     Serial.println(cpm);
 
+    postStr = "Radioactivity (CPM): ";
+    postStr += cpm;
+    postStr.toCharArray(postBuff, CBUF_SZ);
+    publishDebug(postBuff);
+
+    itoa(cpm, postBuff, 10);
+    publish(PUB_GEIGER, postBuff);
+
     postThingspeak(cpm);
     if (cpm > 100 ) IFTTT( EVENT_NAME, cpm);
   }
+  
+  delay(500);
 }
 
 void postThingspeak(int postValue) {
@@ -199,4 +229,32 @@ void displayString(String dispString, int x, int y) {
   display.display();
 }
 
+
+
+//publish to topic & dump to serial
+void publish(const char* topic, const char* text){
+
+  myESP.publish(topic, text, true);
+#ifdef DEBUG_VER
+  Serial.println(text);
+#endif    
+}
+
+
+
+//Dump to debug topic and serial
+void publishDebug(const char* text)
+{
+  String pubString = String(HOSTNAME);
+  char message[128];
+
+  pubString += " : ";
+  pubString += text;
+  //conver the String into a char*
+  pubString.toCharArray(message, 128);
+  myESP.publish(PUB_DEBUG, message, true);
+#ifdef DEBUG_VER
+  Serial.println(pubString);
+#endif    
+}
 
