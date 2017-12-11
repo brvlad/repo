@@ -219,6 +219,11 @@ void loop()
         {
           publish(PUB_STATE, "Initialized");
           isInitPosted = true;
+          ///handle case of duplicate MQTT messages to increment # of valves
+          if (sprinkler.valvesLeft > NUM_SPRINKLERS)
+          {
+            sprinkler.valvesLeft = NUM_SPRINKLERS;
+          }
         }
 
         //check if should start watering
