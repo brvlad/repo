@@ -43,6 +43,7 @@ const char* HOSTNAME = "esp_geiger";
 //output topic nodes
 #define PUB_DEBUG  OUT_TOPIC "debug"
 #define PUB_GEIGER OUT_TOPIC "cpm"
+#define PUB_ID     OUT_TOPIC "id"
 
 #define CBUF_SZ 256  //char buffer size for posting MQTT
 
@@ -66,6 +67,7 @@ ESPHelper myESP(&homeNet);
 volatile unsigned long counts = 0;                       // Tube events
 unsigned long cpm = 0;                                   // CPM
 unsigned long previousMillis;                            // Time measurement
+bool initDone = false;  
 
 //GPIO 0 mapped to D3
 const int inputPin = D5;
@@ -120,7 +122,15 @@ void loop() {
   char postBuff[CBUF_SZ];
   String postStr;
 
-  myESP.loop();   //run wifi accounting
+	//run the loop() method as often as possible - this keeps the network services running
+  if(myESP.loop() >= WIFI_ONLY)
+  {
+    if(!initDone)
+    {
+      initDone = true;
+      publishStr(PUB_ID, getEspID());
+    }
+  }
   
   if (currentMillis - previousMillis > LOG_PERIOD) {
     previousMillis = currentMillis;
@@ -230,6 +240,17 @@ void displayString(String dispString, int x, int y) {
 }
 
 
+//return hostname:IP pair string
+String getEspID()
+{
+  String printStr;
+  
+  printStr = HOSTNAME;
+  printStr += ": ";
+  printStr += myESP.getIP();
+  
+  return printStr;
+}
 
 //publish to topic & dump to serial
 void publish(const char* topic, const char* text){
@@ -241,6 +262,16 @@ void publish(const char* topic, const char* text){
 }
 
 
+//publish to topic & dump to serial
+void publishStr(const char* topic, String str){
+  char text[CBUF_SZ];
+  
+  str.toCharArray(text, CBUF_SZ);
+  myESP.publish(topic, text, true);
+#ifdef DEBUG_VER
+  Serial.println(text);
+#endif    
+}
 
 //Dump to debug topic and serial
 void publishDebug(const char* text)

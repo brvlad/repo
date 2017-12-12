@@ -43,6 +43,7 @@ const char* HOSTNAME = "esp_relay-01";
 //output topic nodes
 #define PUB_DEBUG  OUT_TOPIC "debug"
 #define PUB_STATE  OUT_TOPIC "state"
+#define PUB_ID     OUT_TOPIC "id"
 
 //config topic nodes
 #define CTRL_TURN_ON CTRL_TOPIC "turn_on"
@@ -62,7 +63,7 @@ void setup() {
 
 	myESP.OTA_enable();
 	myESP.OTA_setPassword(OTA_PASS);
-	myESP.OTA_setHostnameWithVersion(HOSTNAME);
+	myESP.OTA_setHostname(HOSTNAME);
   
   //subscribe to all subnodes
 	myESP.addSubscription(CTRL_TURN_ON);
@@ -81,6 +82,7 @@ void loop()
     {
       initDone = true;
       publish(PUB_STATE, "Online");
+      publishStr(PUB_ID, getEspID());
     }
 
     if ((ctrl_turn_on == 1) && !isOn)
@@ -129,4 +131,26 @@ void callback(char* topic, uint8_t* payload, unsigned int length)
 void publish(const char* topic, const char* text){
 
   myESP.publish(topic, text, true);
+}
+
+//publish to topic & dump to serial
+void publishStr(const char* topic, String str){
+  char text[CBUF_SZ];
+  
+  str.toCharArray(text, CBUF_SZ);
+  myESP.publish(topic, text, true);
+#ifdef DEBUG_VER
+  Serial.println(text);
+#endif    
+}
+
+String getEspID()
+{
+  String printStr;
+  
+  printStr = HOSTNAME;
+  printStr += ": ";
+  printStr += myESP.getIP();
+  
+  return printStr;
 }

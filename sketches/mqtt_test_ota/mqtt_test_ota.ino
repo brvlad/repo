@@ -45,6 +45,8 @@ const char* HOSTNAME = "esp_test-01";
 #define PUB_ACK   OUT_TOPIC "ack"
 #define PUB_STATE OUT_TOPIC "state"
 #define PUB_TEMP  OUT_TOPIC "temp"
+#define PUB_ID    OUT_TOPIC "ID"
+
 
 #define CTL_VAL1 "val1"
 #define CTL_VAL2 "val2"
@@ -68,7 +70,7 @@ void setup() {
 
 	myESP.OTA_enable();
 	myESP.OTA_setPassword(OTA_PASS);
-	myESP.OTA_setHostnameWithVersion(HOSTNAME);
+	myESP.OTA_setHostname(HOSTNAME);
   myESP.setHopping(false);
   
   //subscribe to all subnodes
@@ -82,13 +84,15 @@ void setup() {
 }
 
 void loop(){
+
 	//run the loop() method as often as possible - this keeps the network services running
   if(myESP.loop() >= WIFI_ONLY)
   {
     if(!initDone)
     {
       initDone = true;
-      publish(PUB_STATE, " Up n running.");
+      publish(PUB_STATE, " Up n running.");    
+      publishStr(PUB_ID, getEspID());
     }
   }
   if (!configDone)
@@ -196,3 +200,25 @@ void publish(const char* topic, const char* text){
 #endif    
 }
 
+
+//publish to topic & dump to serial
+void publishStr(const char* topic, String str){
+  char text[CBUF_SZ];
+  
+  str.toCharArray(text, CBUF_SZ);
+  myESP.publish(topic, text, true);
+#ifdef DEBUG_VER
+  Serial.println(text);
+#endif    
+}
+
+String getEspID()
+{
+  String printStr;
+  
+  printStr = HOSTNAME;
+  printStr += ": ";
+  printStr += myESP.getIP();
+  
+  return printStr;
+}

@@ -72,6 +72,7 @@ const unsigned long NUM_SPRINKLERS = 2;
 #define PUB_CTEMP  OUT_TOPIC "ctemp"
 #define PUB_FTEMP  OUT_TOPIC "ftemp"
 #define PUB_HUMIDITY  OUT_TOPIC "humidity"
+#define PUB_ID     OUT_TOPIC "id"
 
 //config topic nodes
 #define CTRL_DEEP_SLEEP_EN CTRL_TOPIC "deep_sleep_en"
@@ -84,20 +85,21 @@ const unsigned long NUM_SPRINKLERS = 2;
 
  
 struct Sprinkler{
+/* vars initialized via MQTT */  
   //bEnableDeepSleep is cleared when deep sleep is disabled 
   int bEnableDeepSleep = -1;
   int deepSleep_sec = -1;
   //enable flag per valve
   int bValve0En = -1;
   int bValve1En = -1;
-  //valve status
-  bool bValve0On = 0;
-  bool bValve1On = 0;
   //watering duration per valve
   int valve0EnMin = -1;
   int valve1EnMin = -1;
-  //valves left to water
-  int valvesLeft = 0;
+
+/* internal vars */  
+  //valve status
+  bool bValve0On = 0;
+  bool bValve1On = 0;
   
   //valve watering duration timers. Default to 1 min for test
   Metro valve0Timer = Metro(MINUTE);
@@ -198,6 +200,7 @@ void loop()
         measureTimer.reset();
 				publishDebug("Watering System Started");
         publish(PUB_STATE, "Started");
+        publishStr(PUB_ID, getEspID());
 		}
 		
     if(initDone)
@@ -219,11 +222,6 @@ void loop()
         {
           publish(PUB_STATE, "Initialized");
           isInitPosted = true;
-          ///handle case of duplicate MQTT messages to increment # of valves
-          if (sprinkler.valvesLeft > NUM_SPRINKLERS)
-          {
-            sprinkler.valvesLeft = NUM_SPRINKLERS;
-          }
         }
 
         //check if should start watering
@@ -239,7 +237,8 @@ void loop()
   delay (1000);
   
   //if deep sleep enabled and nothing left to water, and 10+ sec elapsed since start, goto deep sleep
-  if (sprinkler.isInitialized() && sprinkler.bEnableDeepSleep > 0 && (sprinkler.valvesLeft <= 0) && loopTimer.check())
+  if (sprinkler.isInitialized() && sprinkler.bEnableDeepSleep > 0 && loopTimer.check() &&
+      (sprinkler.bValve0En ==0) && (!sprinkler.bValve0On) && (sprinkler.bValve1En ==0) && (!sprinkler.bValve1On) )
   {
     publishDebug("Sleeping...");
     publish(PUB_STATE, "Sleeping...");
@@ -306,7 +305,6 @@ void checkAndStopValves(bool isForceStop)
             publish(PUB_STATE, "Zone 1 done");
             sprinkler.bValve0On = false;
             isCycleRunning = false;
-            sprinkler.valvesLeft--;
             setValve(-1);
           }
           
@@ -316,12 +314,46 @@ void checkAndStopValves(bool isForceStop)
             publish(PUB_STATE, "Zone 2 done");
             sprinkler.bValve1On = false;
             isCycleRunning = false;
-            sprinkler.valvesLeft--;
             setValve(-1);
           }  
         }
 }
 
+
+/*
+Check if watering should be stopped and close valves/update vars
+
+@param bool isForceStop  - if false, check timers, if true, force regardless
+*/
+void stopValve(int sprinklerNum)
+{
+  
+  if (sprinklerNum == 0)
+  {
+    //close valve/reset vars
+    if (sprinkler.bValve0On && isCycleRunning)
+    {
+        publishDebug("Zone1 force stopped");
+        publish(PUB_STATE, "Zone1 force stopped");
+        sprinkler.bValve0On = false;
+        isCycleRunning = false;
+        digitalWrite(relay1, LOW);
+    }
+    
+  }
+  else if (sprinklerNum == 1)
+  {        
+    //close valve/reset vars
+    if (sprinkler.bValve1On && isCycleRunning)
+    {
+        publishDebug("Zone2 force stopped");
+        publish(PUB_STATE, "Zone2 force stopped");
+        sprinkler.bValve1On = false;
+        isCycleRunning = false;
+        digitalWrite(relay2, LOW);
+    }
+  }
+}
 
 //MQTT callback
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -337,10 +369,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     memcpy(newPayload, payload, length);
     newPayload[length] = '\0';
     
-    
-    publishDebug(topic);
+    //publishDebug(topic);    //print topic
 
-            
     if(topicStr.equals(CTRL_DEEP_SLEEP_EN))
     {
     	if(newPayload[0] == '0'){
@@ -377,16 +407,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
     	if(newPayload[0] == '1')
       {
         sprinkler.bValve0En = 1;
-        sprinkler.valvesLeft++;
     		publishDebug("Config: Zone 1 enabled");
     	}
     	else if(newPayload[0] == '0')
       {
-        sprinkler.bValve0En = 0;;
+        sprinkler.bValve0En = 0;
     		publishDebug("Config: Zone 1 disabled");
-        
+
         //check if watering cycle is running, and force stop this zone
-        checkAndStopValves(true);
+        stopValve(0);
     	}
     }
     else if(topicStr.equals(CTRL_ZONE1_DURATION))
@@ -417,16 +446,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
     	if(newPayload[0] == '1')
       {
         sprinkler.bValve1En = 1;
-        sprinkler.valvesLeft++;
     		publishDebug("Config: Zone 2 enabled");
     	}
     	else if(newPayload[0] == '0')
       {
-        sprinkler.bValve1En = 0;;
+        sprinkler.bValve1En = 0;
     		publishDebug("Config: Zone 2 disabled");
         
         //check if watering cycle is running, and force stop this zone
-        checkAndStopValves(true);
+        stopValve(1);
     	}
     }
     else if(topicStr.equals(CTRL_ZONE2_DURATION))
@@ -456,7 +484,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 
 
-//Open/close a valve. -1 to close all valves. TODO: it's ugly
+//Open/close a valve. -1 to close all valves.
 void setValve(int valveNum)
 {  
   if (valveNum >= (int)NUM_SPRINKLERS)
@@ -605,4 +633,24 @@ void publishDebug(const char* text)
 #endif    
 }
 
+//publish to topic & dump to serial
+void publishStr(const char* topic, String str){
+  char text[CBUF_SZ];
+  
+  str.toCharArray(text, CBUF_SZ);
+  myESP.publish(topic, text, true);
+#ifdef DEBUG_VER
+  Serial.println(text);
+#endif    
+}
 
+String getEspID()
+{
+  String printStr;
+  
+  printStr = HOSTNAME;
+  printStr += ": ";
+  printStr += myESP.getIP();
+  
+  return printStr;
+}
