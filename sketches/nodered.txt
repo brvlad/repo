@@ -7,6 +7,212 @@
         "info": ""
     },
     {
+        "id": "b457d8d.7f48e28",
+        "type": "tab",
+        "label": "Relays",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "2c328709.73b718",
+        "type": "tab",
+        "label": "Device list",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "15ed38db.fc1a27",
+        "type": "mqtt-broker",
+        "z": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": ""
+    },
+    {
+        "id": "8caebb6a.674da8",
+        "type": "ui_base",
+        "z": 0,
+        "theme": {
+            "name": "theme-dark",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#097479",
+                    "value": "#097479",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#097479",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#000000",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#0eb8c0",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#555555",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#333333",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#eeeeee",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#097479",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#333333",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "9ffeda9a.d021c8",
+        "type": "ui_tab",
+        "z": "",
+        "name": "XATA",
+        "icon": "dashboard",
+        "order": 1
+    },
+    {
+        "id": "2c8473a5.d0af6c",
+        "type": "ui_group",
+        "z": 0,
+        "name": "Zone1",
+        "tab": "9ffeda9a.d021c8",
+        "order": 2,
+        "disp": false,
+        "width": "6"
+    },
+    {
+        "id": "34cefa3d.080966",
+        "type": "ui_group",
+        "z": 0,
+        "name": "Zone2",
+        "tab": "9ffeda9a.d021c8",
+        "order": 3,
+        "disp": false,
+        "width": "6"
+    },
+    {
+        "id": "56dd025f.f8f81c",
+        "type": "ui_group",
+        "z": 0,
+        "name": "Debug",
+        "tab": "9ffeda9a.d021c8",
+        "order": 4,
+        "disp": false,
+        "width": "6"
+    },
+    {
+        "id": "29dfb3cc.bb24fc",
+        "type": "ui_group",
+        "z": 0,
+        "name": "Output",
+        "tab": "9ffeda9a.d021c8",
+        "order": 1,
+        "disp": true,
+        "width": "6"
+    },
+    {
+        "id": "7cad088f.321738",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Relays",
+        "icon": "dashboard",
+        "order": 2
+    },
+    {
+        "id": "dcc6d76c.737608",
+        "type": "ui_group",
+        "z": "",
+        "name": "Group 1",
+        "tab": "7cad088f.321738",
+        "order": 1,
+        "disp": false,
+        "width": "6"
+    },
+    {
+        "id": "5a61ff66.32729",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Device IDs",
+        "icon": "dashboard",
+        "order": 3
+    },
+    {
+        "id": "4593d764.926248",
+        "type": "ui_group",
+        "z": "",
+        "name": "Device IDs",
+        "tab": "5a61ff66.32729",
+        "order": 1,
+        "disp": false,
+        "width": "6"
+    },
+    {
         "id": "e3dd1db9.2efc",
         "type": "mqtt out",
         "z": "843f1567.7384e8",
@@ -469,7 +675,7 @@
         "payload": "1",
         "payloadType": "str",
         "topic": "",
-        "x": 103.10001373291016,
+        "x": 109.10001373291016,
         "y": 196.8000545501709,
         "wires": [
             [
@@ -699,7 +905,7 @@
         "topic": "",
         "min": 0,
         "max": "60",
-        "step": 1,
+        "step": "2",
         "x": 272.0001907348633,
         "y": 937.0001020431519,
         "wires": [
@@ -1137,28 +1343,6 @@
         "wires": []
     },
     {
-        "id": "8c8b51a0.1f429",
-        "type": "ui_text_input",
-        "z": "843f1567.7384e8",
-        "name": "",
-        "label": "",
-        "group": "34cefa3d.080966",
-        "order": 0,
-        "width": 0,
-        "height": 0,
-        "passthru": true,
-        "mode": "text",
-        "delay": 300,
-        "topic": "",
-        "x": 146.0001106262207,
-        "y": 668.0000638961792,
-        "wires": [
-            [
-                "4761ab8a.4f1e24"
-            ]
-        ]
-    },
-    {
         "id": "4761ab8a.4f1e24",
         "type": "function",
         "z": "843f1567.7384e8",
@@ -1353,69 +1537,417 @@
         ]
     },
     {
-        "id": "15ed38db.fc1a27",
-        "type": "mqtt-broker",
-        "z": "",
-        "broker": "localhost",
-        "port": "1883",
-        "clientid": "",
-        "usetls": false,
-        "compatmode": true,
-        "keepalive": "60",
-        "cleansession": true,
-        "willTopic": "",
-        "willQos": "0",
-        "willPayload": "",
-        "birthTopic": "",
-        "birthQos": "0",
-        "birthPayload": ""
+        "id": "8e968842.911128",
+        "type": "inject",
+        "z": "843f1567.7384e8",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "x": 165.10001373291016,
+        "y": 1845.999981880188,
+        "wires": [
+            [
+                "cf3f2efc.e5fed"
+            ]
+        ]
     },
     {
-        "id": "2c8473a5.d0af6c",
-        "type": "ui_group",
-        "z": 0,
-        "name": "Zone1",
-        "tab": "9ffeda9a.d021c8",
-        "order": 2,
-        "disp": false,
-        "width": "6"
+        "id": "adbc6589.b4cb68",
+        "type": "mqtt out",
+        "z": "843f1567.7384e8",
+        "name": "time",
+        "topic": "hata/random/output/time",
+        "qos": "1",
+        "retain": "true",
+        "broker": "15ed38db.fc1a27",
+        "x": 494.10001373291016,
+        "y": 1844.999981880188,
+        "wires": []
     },
     {
-        "id": "34cefa3d.080966",
-        "type": "ui_group",
-        "z": 0,
-        "name": "Zone2",
-        "tab": "9ffeda9a.d021c8",
-        "order": 3,
-        "disp": false,
-        "width": "6"
+        "id": "cf3f2efc.e5fed",
+        "type": "function",
+        "z": "843f1567.7384e8",
+        "name": "add date",
+        "func": "msg.payload = new Date().toLocaleString('en-US', {hour12:false});\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 341.00000762939453,
+        "y": 1845.7999801635742,
+        "wires": [
+            [
+                "adbc6589.b4cb68"
+            ]
+        ]
     },
     {
-        "id": "56dd025f.f8f81c",
-        "type": "ui_group",
-        "z": 0,
-        "name": "Debug",
-        "tab": "9ffeda9a.d021c8",
-        "order": 4,
-        "disp": false,
-        "width": "6"
+        "id": "40af00ae.ef27c",
+        "type": "mqtt in",
+        "z": "b457d8d.7f48e28",
+        "name": "STATE",
+        "topic": "hata/lights/outlet1/output/state",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 179.00000762939453,
+        "y": 277.0000057220459,
+        "wires": [
+            [
+                "e65d4d33.766b1",
+                "e5b5057d.1d59e8"
+            ]
+        ]
     },
     {
-        "id": "29dfb3cc.bb24fc",
-        "type": "ui_group",
-        "z": 0,
-        "name": "Output",
-        "tab": "9ffeda9a.d021c8",
+        "id": "e65d4d33.766b1",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 421.00003814697266,
+        "y": 276.0000057220459,
+        "wires": []
+    },
+    {
+        "id": "e5b5057d.1d59e8",
+        "type": "ui_text",
+        "z": "b457d8d.7f48e28",
+        "group": "dcc6d76c.737608",
         "order": 1,
-        "disp": true,
-        "width": "6"
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "State:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 462.90003967285156,
+        "y": 319.2001781463623,
+        "wires": []
     },
     {
-        "id": "9ffeda9a.d021c8",
-        "type": "ui_tab",
-        "z": 0,
-        "name": "testing stuff",
-        "icon": "dashboard",
-        "order": 1
+        "id": "6cb7e78d.e00888",
+        "type": "mqtt in",
+        "z": "b457d8d.7f48e28",
+        "name": "debug",
+        "topic": "hata/lights/outlet1/output/debug",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 182.00004196166992,
+        "y": 372.0000286102295,
+        "wires": [
+            [
+                "d5afd2c7.a1a9a",
+                "a4e1b415.079ee8"
+            ]
+        ]
+    },
+    {
+        "id": "a4e1b415.079ee8",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 420.0000457763672,
+        "y": 370.00003814697266,
+        "wires": []
+    },
+    {
+        "id": "d5afd2c7.a1a9a",
+        "type": "function",
+        "z": "b457d8d.7f48e28",
+        "name": "add date",
+        "func": "msg.payload = new Date().toLocaleString()+\": \"+ msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 363.1000175476074,
+        "y": 428.6000385284424,
+        "wires": [
+            [
+                "98c5e918.67e078"
+            ]
+        ]
+    },
+    {
+        "id": "98c5e918.67e078",
+        "type": "ui_text",
+        "z": "b457d8d.7f48e28",
+        "group": "dcc6d76c.737608",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Debug:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 511.9000244140625,
+        "y": 427.2000160217285,
+        "wires": []
+    },
+    {
+        "id": "352f7f36.7c6e5",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 1,
+        "width": "2",
+        "height": "1",
+        "passthru": false,
+        "label": "Relay1 ON",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "str",
+        "topic": "",
+        "x": 180.00000762939453,
+        "y": 105.00000286102295,
+        "wires": [
+            [
+                "c6882f7f.67265",
+                "ec842376.aa6d9"
+            ]
+        ]
+    },
+    {
+        "id": "399cfddf.c85602",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 2,
+        "width": "2",
+        "height": "1",
+        "passthru": false,
+        "label": "Relay1 OFF",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "0",
+        "payloadType": "str",
+        "topic": "",
+        "x": 178.9000129699707,
+        "y": 140.19997882843018,
+        "wires": [
+            [
+                "c6882f7f.67265",
+                "ec842376.aa6d9"
+            ]
+        ]
+    },
+    {
+        "id": "c6882f7f.67265",
+        "type": "mqtt out",
+        "z": "b457d8d.7f48e28",
+        "name": "relay1_on",
+        "topic": "hata/lights/outlet1/config/turn_on",
+        "qos": "2",
+        "retain": "true",
+        "broker": "15ed38db.fc1a27",
+        "x": 427.00010871887207,
+        "y": 138.8000030517578,
+        "wires": []
+    },
+    {
+        "id": "ec842376.aa6d9",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 433.000036239624,
+        "y": 87.00000476837158,
+        "wires": []
+    },
+    {
+        "id": "50ab1b36.3bede4",
+        "type": "debug",
+        "z": "2c328709.73b718",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 362.00003814697266,
+        "y": 41.00000476837158,
+        "wires": []
+    },
+    {
+        "id": "63d75d28.b7afb4",
+        "type": "mqtt in",
+        "z": "2c328709.73b718",
+        "name": "IP+hostname",
+        "topic": "hata/temp/watering/output/id",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 121.00000762939453,
+        "y": 65.00000476837158,
+        "wires": [
+            [
+                "50ab1b36.3bede4",
+                "31e7c81a.215008"
+            ]
+        ]
+    },
+    {
+        "id": "d21f2388.0ae77",
+        "type": "ui_text",
+        "z": "2c328709.73b718",
+        "group": "4593d764.926248",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Wasserstation ID:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 468.9000358581543,
+        "y": 89.20017337799072,
+        "wires": []
+    },
+    {
+        "id": "31e7c81a.215008",
+        "type": "function",
+        "z": "2c328709.73b718",
+        "name": "add date",
+        "func": "msg.payload = new Date().toLocaleString('en-US', {hour12:false})+\": \"+ msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 290.0000343322754,
+        "y": 89.00000190734863,
+        "wires": [
+            [
+                "d21f2388.0ae77"
+            ]
+        ]
+    },
+    {
+        "id": "2d18b1c5.f9233e",
+        "type": "debug",
+        "z": "2c328709.73b718",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 367.0000305175781,
+        "y": 142.00000476837158,
+        "wires": []
+    },
+    {
+        "id": "fc7fe705.379b18",
+        "type": "mqtt in",
+        "z": "2c328709.73b718",
+        "name": "IP+hostname",
+        "topic": "hata/geiger/output/id",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 126,
+        "y": 166.00000476837158,
+        "wires": [
+            [
+                "2d18b1c5.f9233e",
+                "fa4491d1.10c6"
+            ]
+        ]
+    },
+    {
+        "id": "4e42aef0.7bb1f",
+        "type": "ui_text",
+        "z": "2c328709.73b718",
+        "group": "4593d764.926248",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Geiger ID:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 450.90003967285156,
+        "y": 190.20018863677979,
+        "wires": []
+    },
+    {
+        "id": "fa4491d1.10c6",
+        "type": "function",
+        "z": "2c328709.73b718",
+        "name": "add date",
+        "func": "msg.payload = new Date().toLocaleString('en-US', {hour12:false})+\": \"+ msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 294.0000305175781,
+        "y": 192.0000057220459,
+        "wires": [
+            [
+                "4e42aef0.7bb1f"
+            ]
+        ]
+    },
+    {
+        "id": "58fb22fc.177abc",
+        "type": "debug",
+        "z": "2c328709.73b718",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 372.0000305175781,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "fc4db0ef.7919d",
+        "type": "mqtt in",
+        "z": "2c328709.73b718",
+        "name": "IP+hostname",
+        "topic": "hata/lights/outlet1/output/id",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 131,
+        "y": 264,
+        "wires": [
+            [
+                "58fb22fc.177abc",
+                "cb0bf7a0.8a19e8"
+            ]
+        ]
+    },
+    {
+        "id": "79352653.c8e528",
+        "type": "ui_text",
+        "z": "2c328709.73b718",
+        "group": "4593d764.926248",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Outlet1 ID:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 458.90002822875977,
+        "y": 288.20016860961914,
+        "wires": []
+    },
+    {
+        "id": "cb0bf7a0.8a19e8",
+        "type": "function",
+        "z": "2c328709.73b718",
+        "name": "add date",
+        "func": "msg.payload = new Date().toLocaleString('en-US', {hour12:false})+\": \"+ msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 300.00002670288086,
+        "y": 287.99999713897705,
+        "wires": [
+            [
+                "79352653.c8e528"
+            ]
+        ]
     }
 ]
