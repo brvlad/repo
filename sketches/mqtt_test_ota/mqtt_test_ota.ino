@@ -23,8 +23,19 @@ along with ESPHelper.  If not, see <http://www.gnu.org/licenses/>.
 #include <credentials.h>
 #include <TimeLib.h>
 
+extern "C" {
+#include "user_interface.h"
+  uint16 readvdd33(void);
+  bool wifi_set_sleep_type(sleep_type_t);
+  sleep_type_t wifi_get_sleep_type(void);
+}
+
+
 #define CBUF_SZ 256
-#define USE_SERIAL
+//#define USE_SERIAL
+#define DEEP_SLEEP_EN
+//#define LIGHT_SLEEP_EN
+#define DEEP_SLEEP_MS 60000
 
 netInfo homeNet = {  .mqttHost = RPI_MQTT_IP,      //can be blank if not using MQTT
           .mqttUser = "",   //can be blank
@@ -35,7 +46,7 @@ netInfo homeNet = {  .mqttHost = RPI_MQTT_IP,      //can be blank if not using M
 ESPHelper myESP(&homeNet);
 
 //const char* HOSTNAME = "esp_test_d1";
-const char* HOSTNAME = "esp_test-01";
+const char* HOSTNAME = "esp_test-02";
 
 #define TEST_TOPIC_BASE "hata/temp/test/"
 #define OUT_TOPIC  TEST_TOPIC_BASE "output/"
@@ -52,9 +63,6 @@ const char* HOSTNAME = "esp_test-01";
 #define CTL_VAL2 "val2"
 #define CTL_VAL3 "val3"
 
-#define DEEP_SLEEP_EN
-#define DEEP_SLEEP_MS 1000
-
 bool initDone = false;  
 
 bool configDone = false;
@@ -62,23 +70,20 @@ int ctrl_val1 = -1;
 int ctrl_val2 = -1;
 
 void setup() {
-	
+
+#ifdef USE_SERIAL          	
 	Serial.begin(115200);	//start the serial line
 	delay(500);
-
 	Serial.println("Starting Up, Please Wait...");
+#endif          
 
 	myESP.OTA_enable();
 	myESP.OTA_setPassword(OTA_PASS);
 	myESP.OTA_setHostname(HOSTNAME);
-  myESP.setHopping(false);
   
   //subscribe to all subnodes
-	myESP.addSubscription(OUT_TOPIC "#");
   myESP.addSubscription(CTRL_TOPIC "#");
 	myESP.setMQTTCallback(callback);
-  //TODO: remove if pin used
-  //myESP.enableHeartbeat(BUILTIN_LED);
 	myESP.begin();
 	
 }
@@ -97,32 +102,49 @@ void loop(){
   }
   if (!configDone)
   {
+#ifdef USE_SERIAL          
     Serial.println("not set...");
+#endif          
+    
   }
+  
 	//Put application code here
-  delay (500);
+  delay (100);
   if ( !configDone && (ctrl_val1 >= 0) && (ctrl_val2 >= 0))
   {
     configDone = true;
-    Serial.println(" #set on 1...");
+#ifdef USE_SERIAL          
+    Serial.println("### set on 1...");
+#endif          
   }
 	yield();
   if ( !configDone && (ctrl_val1 >= 0) && (ctrl_val2 >= 0))
   {
     configDone = true;
+#ifdef USE_SERIAL          
     Serial.println("### set on 2...");
-  }
+#endif          
+
+    }
   //delay (1000);
 
-#ifdef DEEP_SLEEP_EN    
   if (configDone)
   {
-    delay (5000);
-    publish(PUB_STATE, "...deep sleep...");
-    ESP.deepSleep(DEEP_SLEEP_MS * 1000);
-  }
+#ifdef DEEP_SLEEP_EN
+    if (ctrl_val1 > 0)
+    {
+      publish(PUB_STATE, "...deep sleep...");
+      ESP.deepSleep(DEEP_SLEEP_MS * 1000);
+    }
+    else
+    {
+      delay(500);
+    }
+#elif defined(LIGHT_SLEEP_EN)
+    publish(PUB_STATE, "...light sleep...");
+    goToLightSleep();
 #endif
-
+  }
 }
 
 void callback(char* topic, uint8_t* payload, unsigned int length) 
@@ -146,7 +168,9 @@ void callback(char* topic, uint8_t* payload, unsigned int length)
           printStr = "Got 1 from " CTL_VAL1;
           printStr.toCharArray(message, CBUF_SZ);   
           myESP.publish(PUB_ACK, message, true);  
+#ifdef USE_SERIAL          
           Serial.println(printStr);    
+#endif     
         }
         else if(newPayload[0] == '0')
         {
@@ -154,7 +178,9 @@ void callback(char* topic, uint8_t* payload, unsigned int length)
           printStr = "Got 0 from " CTL_VAL1;
           printStr.toCharArray(message, CBUF_SZ);   
           myESP.publish(PUB_ACK, message, true);
-          Serial.println(printStr);
+#ifdef USE_SERIAL          
+          Serial.println(printStr);    
+#endif          
         }
       }
       else if(topicStr.endsWith(CTL_VAL2))
@@ -165,7 +191,9 @@ void callback(char* topic, uint8_t* payload, unsigned int length)
           printStr = "Got 1 from " CTL_VAL2;
           printStr.toCharArray(message, CBUF_SZ);   
           myESP.publish(PUB_ACK, message, true);  
+#ifdef USE_SERIAL          
           Serial.println(printStr);    
+#endif          
         }
         else if(newPayload[0] == '0')
         {
@@ -173,13 +201,17 @@ void callback(char* topic, uint8_t* payload, unsigned int length)
           printStr = "Got 0 from " CTL_VAL2;
           printStr.toCharArray(message, CBUF_SZ);   
           myESP.publish(PUB_ACK, message, true);
+#ifdef USE_SERIAL          
           Serial.println(printStr);
+#endif          
         }
       }
       else if(topicStr.endsWith(CTL_VAL3))
       {
           myESP.publish(PUB_ACK, newPayload, false);  
+#ifdef USE_SERIAL
           Serial.println(newPayload);    
+#endif
       }
     }
 }
@@ -221,4 +253,22 @@ String getEspID()
   printStr += myESP.getIP();
   
   return printStr;
+}
+
+
+void goToLightSleep()
+{
+#ifdef USE_SERIAL    
+    Serial.println("switching off Wifi Modem and CPU");
+#endif
+    wifi_set_sleep_type(LIGHT_SLEEP_T);
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    // how do we call this: 
+    //gpio_pin_wakeup_enable(GPIO_ID_PIN(switchPin),GPIO_PIN_INTR_NEGEDGE);
+    wifi_fpm_open();
+    wifi_fpm_do_sleep(10*1000);
+    Serial.println("out of light sleep");
+
+    //if(WiFi.forceSleepBegin(26843455)) sleep = true;
 }

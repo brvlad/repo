@@ -1588,11 +1588,11 @@
         "id": "40af00ae.ef27c",
         "type": "mqtt in",
         "z": "b457d8d.7f48e28",
-        "name": "STATE",
+        "name": "outlet1 STATE",
         "topic": "hata/lights/outlet1/output/state",
         "qos": "1",
         "broker": "15ed38db.fc1a27",
-        "x": 179.00000762939453,
+        "x": 199.00000762939453,
         "y": 277.0000057220459,
         "wires": [
             [
@@ -1622,10 +1622,10 @@
         "width": 0,
         "height": 0,
         "name": "",
-        "label": "State:",
+        "label": "Portable outlet:",
         "format": "{{msg.payload}}",
         "layout": "row-spread",
-        "x": 462.90003967285156,
+        "x": 492.90003967285156,
         "y": 319.2001781463623,
         "wires": []
     },
@@ -1679,7 +1679,7 @@
         "type": "ui_text",
         "z": "b457d8d.7f48e28",
         "group": "dcc6d76c.737608",
-        "order": 4,
+        "order": 7,
         "width": 0,
         "height": 0,
         "name": "",
@@ -1696,8 +1696,8 @@
         "z": "b457d8d.7f48e28",
         "name": "",
         "group": "dcc6d76c.737608",
-        "order": 1,
-        "width": "2",
+        "order": 2,
+        "width": "3",
         "height": "1",
         "passthru": false,
         "label": "Relay1 ON",
@@ -1722,8 +1722,8 @@
         "z": "b457d8d.7f48e28",
         "name": "",
         "group": "dcc6d76c.737608",
-        "order": 2,
-        "width": "2",
+        "order": 3,
+        "width": "3",
         "height": "1",
         "passthru": false,
         "label": "Relay1 OFF",
@@ -1805,10 +1805,10 @@
         "width": 0,
         "height": 0,
         "name": "",
-        "label": "Wasserstation ID:",
+        "label": "Water:",
         "format": "{{msg.payload}}",
         "layout": "row-spread",
-        "x": 468.9000358581543,
+        "x": 428.9000358581543,
         "y": 89.20017337799072,
         "wires": []
     },
@@ -1862,14 +1862,14 @@
         "type": "ui_text",
         "z": "2c328709.73b718",
         "group": "4593d764.926248",
-        "order": 1,
+        "order": 2,
         "width": "0",
         "height": "0",
         "name": "",
-        "label": "Geiger ID:",
+        "label": "Geiger:",
         "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "x": 450.90003967285156,
+        "layout": "row-center",
+        "x": 440.90003967285156,
         "y": 190.20018863677979,
         "wires": []
     },
@@ -1923,14 +1923,14 @@
         "type": "ui_text",
         "z": "2c328709.73b718",
         "group": "4593d764.926248",
-        "order": 1,
+        "order": 3,
         "width": 0,
         "height": 0,
         "name": "",
-        "label": "Outlet1 ID:",
+        "label": "Outlet1:",
         "format": "{{msg.payload}}",
         "layout": "row-spread",
-        "x": 458.90002822875977,
+        "x": 448.90002822875977,
         "y": 288.20016860961914,
         "wires": []
     },
@@ -1948,6 +1948,284 @@
             [
                 "79352653.c8e528"
             ]
+        ]
+    },
+    {
+        "id": "3b9c7ab0.88bf16",
+        "type": "mqtt in",
+        "z": "b457d8d.7f48e28",
+        "name": "sonoff1",
+        "topic": "hata/sw/te/s10_patio_sw/SENSOR",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 167.00000762939453,
+        "y": 540.0000276565552,
+        "wires": [
+            [
+                "a29ab8da.1aedb8"
+            ]
+        ]
+    },
+    {
+        "id": "ebf8fb1.233da08",
+        "type": "function",
+        "z": "b457d8d.7f48e28",
+        "name": "parse temp",
+        "func": "msg.payload = msg.payload.DHT11.Temperature;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 365.00003814697266,
+        "y": 566.0000286102295,
+        "wires": [
+            [
+                "40b8debc.a9d46",
+                "7b002767.f37618"
+            ]
+        ]
+    },
+    {
+        "id": "40b8debc.a9d46",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 673.0000610351562,
+        "y": 501.00007724761963,
+        "wires": []
+    },
+    {
+        "id": "a29ab8da.1aedb8",
+        "type": "json",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "pretty": false,
+        "x": 225.10000610351562,
+        "y": 618.4000387191772,
+        "wires": [
+            [
+                "ebf8fb1.233da08",
+                "3c26dbe8.0c4be4"
+            ]
+        ]
+    },
+    {
+        "id": "7b002767.f37618",
+        "type": "ui_gauge",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "29dfb3cc.bb24fc",
+        "order": 6,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "Sonoff temp, F",
+        "label": "F",
+        "format": "{{value}}",
+        "min": "23",
+        "max": "110",
+        "colors": [
+            "#00ffff",
+            "#00ff00",
+            "#ff0000"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 682.0000686645508,
+        "y": 553.0000314712524,
+        "wires": []
+    },
+    {
+        "id": "11044083.0ee66f",
+        "type": "ui_gauge",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "29dfb3cc.bb24fc",
+        "order": 7,
+        "width": "3",
+        "height": "3",
+        "gtype": "wave",
+        "title": "Sonoff humidity, %",
+        "label": "%",
+        "format": "{{value}}",
+        "min": "0",
+        "max": "100",
+        "colors": [
+            "#b30218",
+            "#e6e600",
+            "#00ff00"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "x": 694,
+        "y": 597.0000143051147,
+        "wires": []
+    },
+    {
+        "id": "3c26dbe8.0c4be4",
+        "type": "function",
+        "z": "b457d8d.7f48e28",
+        "name": "parse humidity",
+        "func": "msg.payload = msg.payload.DHT11.Humidity;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 390,
+        "y": 621.0000143051147,
+        "wires": [
+            [
+                "11044083.0ee66f"
+            ]
+        ]
+    },
+    {
+        "id": "2bd3b260.d924be",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Sonoff1 ON",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 192,
+        "y": 712.3999633789062,
+        "wires": [
+            [
+                "c150d701.5059e8",
+                "308fa448.fecdec"
+            ]
+        ]
+    },
+    {
+        "id": "6ea90c54.caff94",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 6,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Sonoff1 OFF",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 190.90000534057617,
+        "y": 747.5999393463135,
+        "wires": [
+            [
+                "c150d701.5059e8",
+                "308fa448.fecdec"
+            ]
+        ]
+    },
+    {
+        "id": "c150d701.5059e8",
+        "type": "mqtt out",
+        "z": "b457d8d.7f48e28",
+        "name": "sonoff1_on",
+        "topic": "hata/sw/cm/s10_patio_sw/POWER",
+        "qos": "2",
+        "retain": "false",
+        "broker": "15ed38db.fc1a27",
+        "x": 449.00010108947754,
+        "y": 746.1999635696411,
+        "wires": []
+    },
+    {
+        "id": "308fa448.fecdec",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 445.0000286102295,
+        "y": 694.3999652862549,
+        "wires": []
+    },
+    {
+        "id": "a29910c6.5944a",
+        "type": "mqtt in",
+        "z": "b457d8d.7f48e28",
+        "name": "Sonoff1 STATE",
+        "topic": "hata/sw/st/s10_patio_sw/POWER",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 169.00001525878906,
+        "y": 833.800012588501,
+        "wires": [
+            [
+                "27309506.48595a",
+                "9119e19b.c4c1a"
+            ]
+        ]
+    },
+    {
+        "id": "27309506.48595a",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 343.0000705718994,
+        "y": 876.800009727478,
+        "wires": []
+    },
+    {
+        "id": "9119e19b.c4c1a",
+        "type": "ui_text",
+        "z": "b457d8d.7f48e28",
+        "group": "dcc6d76c.737608",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Sonoff1:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 667.9001655578613,
+        "y": 833.000207901001,
+        "wires": []
+    },
+    {
+        "id": "7d6efa05.885f84",
+        "type": "json",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "pretty": false,
+        "x": 346.00001525878906,
+        "y": 832.8000392913818,
+        "wires": [
+            [
+                "7b9fbf7c.cad68"
+            ]
+        ]
+    },
+    {
+        "id": "7b9fbf7c.cad68",
+        "type": "function",
+        "z": "b457d8d.7f48e28",
+        "name": "parse state",
+        "func": "msg.payload = msg.payload.POWER;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 491.9000129699707,
+        "y": 831.4000129699707,
+        "wires": [
+            []
         ]
     }
 ]
