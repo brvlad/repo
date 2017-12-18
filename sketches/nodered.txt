@@ -180,7 +180,7 @@
         "id": "7cad088f.321738",
         "type": "ui_tab",
         "z": "",
-        "name": "Relays",
+        "name": "Switches",
         "icon": "dashboard",
         "order": 2
     },
@@ -1679,7 +1679,7 @@
         "type": "ui_text",
         "z": "b457d8d.7f48e28",
         "group": "dcc6d76c.737608",
-        "order": 7,
+        "order": 10,
         "width": 0,
         "height": 0,
         "name": "",
@@ -1954,8 +1954,8 @@
         "id": "3b9c7ab0.88bf16",
         "type": "mqtt in",
         "z": "b457d8d.7f48e28",
-        "name": "sonoff1",
-        "topic": "hata/sw/te/s10_patio_sw/SENSOR",
+        "name": "sonoff2",
+        "topic": "hata/sw/te/sonoff2/SENSOR",
         "qos": "1",
         "broker": "15ed38db.fc1a27",
         "x": 167.00000762939453,
@@ -2020,7 +2020,7 @@
         "width": "3",
         "height": "3",
         "gtype": "gage",
-        "title": "Sonoff temp, F",
+        "title": "Garage temp, F",
         "label": "F",
         "format": "{{value}}",
         "min": "23",
@@ -2046,7 +2046,7 @@
         "width": "3",
         "height": "3",
         "gtype": "wave",
-        "title": "Sonoff humidity, %",
+        "title": "Garage humidity, %",
         "label": "%",
         "format": "{{value}}",
         "min": "0",
@@ -2088,14 +2088,14 @@
         "width": "3",
         "height": "1",
         "passthru": false,
-        "label": "Sonoff1 ON",
+        "label": "Garage light ON",
         "color": "",
         "bgcolor": "",
         "icon": "",
         "payload": "1",
         "payloadType": "num",
         "topic": "",
-        "x": 192,
+        "x": 202,
         "y": 712.3999633789062,
         "wires": [
             [
@@ -2114,14 +2114,14 @@
         "width": "3",
         "height": "1",
         "passthru": false,
-        "label": "Sonoff1 OFF",
+        "label": "Garage light OFF",
         "color": "",
         "bgcolor": "",
         "icon": "",
         "payload": "0",
         "payloadType": "num",
         "topic": "",
-        "x": 190.90000534057617,
+        "x": 210.90000534057617,
         "y": 747.5999393463135,
         "wires": [
             [
@@ -2134,8 +2134,8 @@
         "id": "c150d701.5059e8",
         "type": "mqtt out",
         "z": "b457d8d.7f48e28",
-        "name": "sonoff1_on",
-        "topic": "hata/sw/cm/s10_patio_sw/POWER",
+        "name": "sonoff2_on",
+        "topic": "hata/sw/cm/sonoff2/POWER",
         "qos": "2",
         "retain": "false",
         "broker": "15ed38db.fc1a27",
@@ -2159,8 +2159,8 @@
         "id": "a29910c6.5944a",
         "type": "mqtt in",
         "z": "b457d8d.7f48e28",
-        "name": "Sonoff1 STATE",
-        "topic": "hata/sw/st/s10_patio_sw/POWER",
+        "name": "Sonoff2 STATE",
+        "topic": "hata/sw/st/sonoff2/POWER",
         "qos": "1",
         "broker": "15ed38db.fc1a27",
         "x": 169.00001525878906,
@@ -2193,10 +2193,10 @@
         "width": 0,
         "height": 0,
         "name": "",
-        "label": "Sonoff1:",
+        "label": "Garage light:",
         "format": "{{msg.payload}}",
         "layout": "row-spread",
-        "x": 667.9001655578613,
+        "x": 677.9001655578613,
         "y": 833.000207901001,
         "wires": []
     },
@@ -2226,6 +2226,292 @@
         "y": 831.4000129699707,
         "wires": [
             []
+        ]
+    },
+    {
+        "id": "3e61fe24.055572",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 8,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Other light ON",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 205,
+        "y": 954,
+        "wires": [
+            [
+                "8c899cdf.e1ea1",
+                "bea05edb.04fba"
+            ]
+        ]
+    },
+    {
+        "id": "39895190.d94b5e",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 9,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Other light OFF",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 203.90000534057617,
+        "y": 989.1999759674072,
+        "wires": [
+            [
+                "8c899cdf.e1ea1",
+                "bea05edb.04fba"
+            ]
+        ]
+    },
+    {
+        "id": "8c899cdf.e1ea1",
+        "type": "mqtt out",
+        "z": "b457d8d.7f48e28",
+        "name": "sonoff1_on",
+        "topic": "hata/sw/cm/s10_patio_sw/POWER",
+        "qos": "2",
+        "retain": "false",
+        "broker": "15ed38db.fc1a27",
+        "x": 452.00010108947754,
+        "y": 987.8000001907349,
+        "wires": []
+    },
+    {
+        "id": "bea05edb.04fba",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 448.0000286102295,
+        "y": 936.0000019073486,
+        "wires": []
+    },
+    {
+        "id": "423497de.50d138",
+        "type": "mqtt in",
+        "z": "b457d8d.7f48e28",
+        "name": "Sonoff1 STATE",
+        "topic": "hata/sw/st/s10_patio_sw/POWER",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 172.00001525878906,
+        "y": 1075.4000492095947,
+        "wires": [
+            [
+                "84129803.1e7c28",
+                "5af7ddd3.8fe834"
+            ]
+        ]
+    },
+    {
+        "id": "84129803.1e7c28",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 346.0000705718994,
+        "y": 1118.4000463485718,
+        "wires": []
+    },
+    {
+        "id": "5af7ddd3.8fe834",
+        "type": "ui_text",
+        "z": "b457d8d.7f48e28",
+        "group": "dcc6d76c.737608",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Other light:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 680.9001655578613,
+        "y": 1074.6002445220947,
+        "wires": []
+    },
+    {
+        "id": "3f71dcd3.b45284",
+        "type": "json",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "pretty": false,
+        "x": 349.00001525878906,
+        "y": 1074.4000759124756,
+        "wires": [
+            [
+                "83051bc.85df1e8"
+            ]
+        ]
+    },
+    {
+        "id": "83051bc.85df1e8",
+        "type": "function",
+        "z": "b457d8d.7f48e28",
+        "name": "parse state",
+        "func": "msg.payload = msg.payload.POWER;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 494.9000129699707,
+        "y": 1073.0000495910645,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "13367bc9.925fe4",
+        "type": "mqtt in",
+        "z": "2c328709.73b718",
+        "name": "Sonoff2",
+        "topic": "hata/sw/st/sonoff2/RESULT",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 104.00003814697266,
+        "y": 444.00001335144043,
+        "wires": [
+            [
+                "6aa54f11.fe3d3"
+            ]
+        ]
+    },
+    {
+        "id": "4147e069.a3c11",
+        "type": "debug",
+        "z": "2c328709.73b718",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 655.0000610351562,
+        "y": 507.00001430511475,
+        "wires": []
+    },
+    {
+        "id": "283f160c.c5cdba",
+        "type": "ui_text",
+        "z": "2c328709.73b718",
+        "group": "4593d764.926248",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Sonoff 2:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 825.9001693725586,
+        "y": 439.2002067565918,
+        "wires": []
+    },
+    {
+        "id": "6aa54f11.fe3d3",
+        "type": "json",
+        "z": "2c328709.73b718",
+        "name": "",
+        "pretty": false,
+        "x": 228.00001907348633,
+        "y": 444.00006103515625,
+        "wires": [
+            [
+                "18fa384b.8473a8"
+            ]
+        ]
+    },
+    {
+        "id": "18fa384b.8473a8",
+        "type": "function",
+        "z": "2c328709.73b718",
+        "name": "parse state",
+        "func": "msg.payload = msg.payload.IPAddress1;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 411.9000186920166,
+        "y": 445.60001277923584,
+        "wires": [
+            [
+                "4147e069.a3c11",
+                "dc4a920a.98461"
+            ]
+        ]
+    },
+    {
+        "id": "94f83ac8.5c0aa8",
+        "type": "mqtt out",
+        "z": "2c328709.73b718",
+        "name": "query IP",
+        "topic": "hata/sw/cm/sonoff2/IPAddress1",
+        "qos": "1",
+        "retain": "false",
+        "broker": "15ed38db.fc1a27",
+        "x": 497.1000633239746,
+        "y": 348.0000104904175,
+        "wires": []
+    },
+    {
+        "id": "b667f87b.e42918",
+        "type": "debug",
+        "z": "2c328709.73b718",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "false",
+        "x": 460.10003662109375,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "565149ad.78a918",
+        "type": "inject",
+        "z": "2c328709.73b718",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "repeat": "600",
+        "crontab": "",
+        "once": true,
+        "x": 167.1000099182129,
+        "y": 352.0000114440918,
+        "wires": [
+            [
+                "94f83ac8.5c0aa8",
+                "b667f87b.e42918"
+            ]
+        ]
+    },
+    {
+        "id": "dc4a920a.98461",
+        "type": "function",
+        "z": "2c328709.73b718",
+        "name": "add date",
+        "func": "msg.payload = new Date().toLocaleString('en-US', {hour12:false})+\": \"+ msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 616.0000152587891,
+        "y": 450.00006198883057,
+        "wires": [
+            [
+                "283f160c.c5cdba"
+            ]
         ]
     }
 ]
