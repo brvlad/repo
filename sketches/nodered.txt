@@ -374,7 +374,7 @@
         "payloadType": "num",
         "repeat": "",
         "crontab": "",
-        "once": true,
+        "once": false,
         "x": 239.0000228881836,
         "y": 1245.0000610351562,
         "wires": [
@@ -1202,7 +1202,7 @@
         "name": "Zone 2 scheduler",
         "lat": "32.854749",
         "lon": "-117.204547",
-        "starttime": "1080",
+        "starttime": "1140",
         "endtime": "10015",
         "startoff": 0,
         "endoff": "0",
@@ -2507,10 +2507,52 @@
         "outputs": 1,
         "noerr": 0,
         "x": 616.0000152587891,
-        "y": 450.00006198883057,
+        "y": 442.00001525878906,
         "wires": [
             [
                 "283f160c.c5cdba"
+            ]
+        ]
+    },
+    {
+        "id": "80040cf9.d9ff5",
+        "type": "ui_gauge",
+        "z": "843f1567.7384e8",
+        "name": "",
+        "group": "29dfb3cc.bb24fc",
+        "order": 5,
+        "width": "3",
+        "height": "3",
+        "gtype": "gage",
+        "title": "Air quality, Methane/CO sensor",
+        "label": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "10",
+        "colors": [
+            "#ff0000",
+            "#e6e600",
+            "#00ff00"
+        ],
+        "seg1": "4",
+        "seg2": "7",
+        "x": 840.0000228881836,
+        "y": 1723.6000757217407,
+        "wires": []
+    },
+    {
+        "id": "4641a588.989a2c",
+        "type": "mqtt in",
+        "z": "843f1567.7384e8",
+        "name": "Air quality, MQ9 gas sensor",
+        "topic": "hata/geiger/output/mq9",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 551.8998718261719,
+        "y": 1723.200026512146,
+        "wires": [
+            [
+                "80040cf9.d9ff5"
             ]
         ]
     }

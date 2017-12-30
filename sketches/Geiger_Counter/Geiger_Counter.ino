@@ -17,25 +17,17 @@
 #include <credentials.h>
 #include <IFTTTMaker.h>
 
-#define WEMOS_OLED
-
 //using Adafruit_SSD1306-esp8266-64x48 lib for wemos OLED.
 //Adafruit_SSD1306_master don't work...
-#ifndef WEMOS_OLED
 #include <SSD1306.h>
-#else
-#include <Adafruit_SSD1306.h>
-#endif
-
 
 #define LOG_PERIOD 20000 //Logging period in milliseconds
 #define MINUTE_PERIOD 60000
-//#define LOG_PERIOD 2000 //Logging period in milliseconds
-//#define MINUTE_PERIOD 5000
 
 // IFTTT
 #define EVENT_NAME "RadioactivityCPM" // Name of your event name, set when you are creating the applet
 
+//#define GEIGER_TOPIC_BASE "hata/temp/geiger/"
 #define GEIGER_TOPIC_BASE "hata/geiger/"
 const char* HOSTNAME = "esp_geiger";  
 
@@ -43,9 +35,14 @@ const char* HOSTNAME = "esp_geiger";
 //output topic nodes
 #define PUB_DEBUG  OUT_TOPIC "debug"
 #define PUB_GEIGER OUT_TOPIC "cpm"
+#define PUB_MQ9    OUT_TOPIC "mq9"
 #define PUB_ID     OUT_TOPIC "id"
 
 #define CBUF_SZ 256  //char buffer size for posting MQTT
+
+
+#define R0_VAL 1.08   //MQ9 gas sensor calibration val
+#define LOGIC_LEVEL 3.3   //3.3V logic
 
 // ThingSpeak Settings
 const int channelID = THINGSPEAK_CHANNEL_ID;
@@ -69,18 +66,17 @@ unsigned long cpm = 0;                                   // CPM
 unsigned long previousMillis;                            // Time measurement
 bool initDone = false;  
 
-//GPIO 0 mapped to D3
+#define LGREEN D7
+#define LRED   D6
+#define LBLUE  D8
+
+//GPIO 0 mapped to D5
 const int inputPin = D5;
 
 //Display setup:
 //SDA: Serial Data Line (D2/GPIO4 on the Wemos D1 Mini)
 //SCL: Serial Clock Line (D1/GPIO5 on the Wemos D1 Mini)
-
-#ifndef WEMOS_OLED
-SSD1306  display(0x78, D2, D1);   //i2c addr, SDA, SCL
-#else
-Adafruit_SSD1306 display(0); ///gpio0
-#endif
+SSD1306  display(0x3c, D2, D1);
 
 void ISR_impulse() { // Captures count of events from Geiger counter board
   counts++;
@@ -89,11 +85,17 @@ void ISR_impulse() { // Captures count of events from Geiger counter board
 void setup() 
 {
   Serial.begin(115200);
-  
   displayInit();
-  //displayString("Welcome", 64, 15);
   Serial.println("Connecting to Wi-Fi");
 
+  //setup LEDs
+  pinMode(LGREEN, OUTPUT);
+  pinMode(LBLUE, OUTPUT);
+  pinMode(LRED, OUTPUT);
+  analogWrite(LGREEN, 0);
+  analogWrite(LBLUE, 255);
+  analogWrite(LRED, 0);
+  
   //setup ESPHelper
 	myESP.OTA_enable();
 	myESP.OTA_setPassword(OTA_PASS);
@@ -101,26 +103,31 @@ void setup()
 	myESP.begin();		//start ESPHelper
   
   // Clear the buffer.
-  display.clearDisplay();
-  //display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0,0);
-  display.println("WiFi on @: ");  
-  display.println(WiFi.localIP());
+  display.clear();
+  display.drawString(0, 0,"WiFi on @: ");  
+  display.drawString(0, 16, WiFi.localIP().toString());
   display.display();
   delay(1000);
 
-  pinMode(inputPin, INPUT);                                        // Set pin for capturing Tube events
+  //setup analog and interrupt pins
+  pinMode(A0, INPUT);
+  pinMode(inputPin, INPUT);                           // Set pin for capturing Tube events
   attachInterrupt(inputPin, ISR_impulse, FALLING); // Define interrupt on falling edge
   Serial.println("Interrupt in: ");
   Serial.println(inputPin);
-
 }
+
 
 void loop() {
   unsigned long currentMillis = millis();
   char postBuff[CBUF_SZ];
   String postStr;
+  float sensor_volt;
+  float RsRo_air; //  Get the value of RS via in a clear air
+  float R0;  // Get the value of R0 via in LPG
+  float ratio = 0; // Get ratio RS_GAS/RsRo_air
+  static int cnt = 0;  //averaged num of gas samples
+  static float avgMq9 = 0; //average mq9 readings
 
 	//run the loop() method as often as possible - this keeps the network services running
   if(myESP.loop() >= WIFI_ONLY)
@@ -131,25 +138,38 @@ void loop() {
       publishStr(PUB_ID, getEspID());
     }
   }
-  
-  if (currentMillis - previousMillis > LOG_PERIOD) {
+
+/***************  MQ9 sensor  handling ********************/
+  //get sensor reading and scale to [0-5] V
+  sensor_volt = analogRead(A0);
+  sensor_volt = (sensor_volt/1024)*LOGIC_LEVEL;
+  RsRo_air = (LOGIC_LEVEL-sensor_volt)/sensor_volt; // omit * RL
+  R0 = RsRo_air/9.9; // The ratio of RS/R0 is 9.9 in LPG gas from Graph (Found using WebPlotDigitizer)
+
+  ratio = RsRo_air/R0_VAL;  // ratio = RS/R0
+  cnt++;
+  avgMq9 = (avgMq9*(cnt-1) + ratio)/cnt;
+  //rsair (RsRo of air) = 2 ~ 200ppm, 0.3 ~ 10000ppm
+  if (ratio < 4)
+  {
+    Serial.print("Danger zone! Over 500ppm. ([ 10-2] is less than 200ppm, [0.3] ~ 10000ppm) RsR0 == ");
+    Serial.println(ratio);
+  }
+  Serial.print("sensor_volt = ");
+  Serial.print(sensor_volt);
+  Serial.print(" raw RsRo = ");
+  Serial.print(RsRo_air);
+  Serial.print(" adj Rs/R0 = ");
+  Serial.println(ratio);
+
+
+  if (currentMillis - previousMillis > LOG_PERIOD) 
+  {
     previousMillis = currentMillis;
     cpm = counts * MINUTE_PERIOD / LOG_PERIOD;
     Serial.print("counts: ");
     Serial.println(counts);
     counts = 0;
-    //display.clear();
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setCursor(0,0);
-    //display.print("IP:");
-    //display.println(WiFi.localIP());
-    display.setTextSize(3);
-    display.println("CPM");  
-    display.println(cpm);
-    display.display();
-    //displayString("CPM:", 10, 20);
-    //displayInt(cpm, 64, 40);
 
     Serial.print("Radioactivity (CPM): ");
     Serial.println(cpm);
@@ -162,11 +182,44 @@ void loop() {
     itoa(cpm, postBuff, 10);
     publish(PUB_GEIGER, postBuff);
 
+    //publish and clear average MQ9 readings for sample period
+    dtostrf(avgMq9, 10, 2, postBuff);
+    publish(PUB_MQ9, postBuff);
+    cnt = 0;
+    avgMq9 = 0;
+    
     postThingspeak(cpm);
     if (cpm > 100 ) IFTTT( EVENT_NAME, cpm);
   }
+
+//Now display stuff:
+  display.clear();
+  postStr = "\u2622 CPM: ";
+  postStr += cpm;
+  display.drawString(0, 0, postStr);
+  postStr = "Gas/CO: ";
+  postStr += ratio;
+  display.drawString(0, 24, postStr);  
+  if (ratio < 3.5)
+  {
+    setColor(255,0,0);
+    postStr = "Air quality is BAD!";
+  }
+  else if (ratio > 7)
+  {
+    setColor(0,255,0);
+    postStr = "Air quality is good";
+  }
+  else
+  {
+    setColor(255,196,0);
+    postStr = "Air quality is blah...";
+  }
+  display.drawString(0, 48, postStr);  
+  display.display();
   
-  delay(500);
+/***************   ********************/
+  delay(1000);
 }
 
 void postThingspeak(int postValue) {
@@ -203,42 +256,12 @@ void IFTTT(String event, int postValue) {
   }
 }
 
-void displayInit() {
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 64x48)
-  //display.init();
-  //display.flipScreenVertically();
-  //display.setFont(ArialMT_Plain_24);
+void displayInit() 
+{
+  display.init();
+  display.flipScreenVertically();
+  display.setFont(ArialMT_Plain_16);
 }
-
-void displayInt(int dispInt, int x, int y) {
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(x,y);
-  display.println(dispInt);  
-
-  /*display.setColor(WHITE);
-  display.setTextAlignment(TEXT_ALIGN_CENTER);
-  display.drawString(x, y, String(dispInt));
-  display.setFont(ArialMT_Plain_24);
-  */
-  display.display();
-}
-
-void displayString(String dispString, int x, int y) {
-  
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(x,y);
-  display.println(dispString);  
-
-  /*display.setColor(WHITE);
-  display.setTextAlignment(TEXT_ALIGN_CENTER);
-  display.drawString(x, y, dispString);
-  display.setFont(ArialMT_Plain_24);*/
-  
-  display.display();
-}
-
 
 //return hostname:IP pair string
 String getEspID()
@@ -288,4 +311,40 @@ void publishDebug(const char* text)
   Serial.println(pubString);
 #endif    
 }
+
+
+
+void setColor (int R, int G, int B)
+{
+  analogWrite(LRED, R);
+  analogWrite(LGREEN, G);
+  analogWrite(LBLUE, B);
+}
+
+/*
+ //measuring gas calibration
+ void loop() {
+
+    float sensor_volt;
+    float RS_gas; // Get value of RS in a GAS
+    float ratio; // Get ratio RS_GAS/RsRo_air
+    int sensorValue = analogRead(A0);
+    sensor_volt=(float)sensorValue/1024*5.0;
+    RS_gas = (5.0-sensor_volt)/sensor_volt; // omit *RL
+
+    //Replace the name "R0" with the value of R0 in the demo of First Test
+    ratio = RS_gas/R0_VAL;  // ratio = RS/R0
+
+    Serial.print("sensor_volt = ");
+    Serial.println(sensor_volt);
+    Serial.print("RS_ratio = ");
+    Serial.println(RS_gas);
+    Serial.print("Rs/R0 = ");
+    Serial.println(ratio);
+
+    Serial.print("\n\n");
+
+    delay(1000);
+}
+*/
 
