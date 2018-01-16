@@ -483,7 +483,7 @@
         "type": "debug",
         "z": "843f1567.7384e8",
         "name": "",
-        "active": true,
+        "active": false,
         "console": "false",
         "complete": "payload",
         "x": 320.000057220459,
@@ -842,7 +842,7 @@
         "name": "",
         "label": "Low power Enable",
         "group": "56dd025f.f8f81c",
-        "order": 2,
+        "order": 3,
         "width": 0,
         "height": 0,
         "passthru": true,
@@ -923,7 +923,7 @@
         "name": "",
         "label": "ESP Sleep, sec",
         "group": "56dd025f.f8f81c",
-        "order": 3,
+        "order": 4,
         "width": 0,
         "height": 0,
         "passthru": true,
@@ -993,7 +993,7 @@
         "id": "416ba9f9.456d18",
         "type": "ui_text",
         "z": "843f1567.7384e8",
-        "group": "29dfb3cc.bb24fc",
+        "group": "56dd025f.f8f81c",
         "order": 1,
         "width": 0,
         "height": 0,
@@ -1026,7 +1026,7 @@
         "type": "ui_text",
         "z": "843f1567.7384e8",
         "group": "56dd025f.f8f81c",
-        "order": 4,
+        "order": 5,
         "width": 0,
         "height": 0,
         "name": "",
@@ -1043,7 +1043,7 @@
         "z": "843f1567.7384e8",
         "name": "",
         "group": "56dd025f.f8f81c",
-        "order": 1,
+        "order": 2,
         "width": "5",
         "height": "3",
         "gtype": "gage",
@@ -1069,11 +1069,11 @@
         "z": "843f1567.7384e8",
         "name": "",
         "group": "29dfb3cc.bb24fc",
-        "order": 2,
+        "order": 1,
         "width": "3",
         "height": "3",
         "gtype": "gage",
-        "title": "Temperature, F",
+        "title": "Outside temp, F",
         "label": "F",
         "format": "{{value}}",
         "min": "23",
@@ -1095,11 +1095,11 @@
         "z": "843f1567.7384e8",
         "name": "",
         "group": "29dfb3cc.bb24fc",
-        "order": 4,
+        "order": 3,
         "width": "3",
         "height": "3",
         "gtype": "wave",
-        "title": "Humidity, %",
+        "title": "Outside humidity, %",
         "label": "%",
         "format": "{{value}}",
         "min": "0",
@@ -1111,7 +1111,7 @@
         ],
         "seg1": "",
         "seg2": "",
-        "x": 840.1000709533691,
+        "x": 860.1000709533691,
         "y": 1420.6000576019287,
         "wires": []
     },
@@ -1426,7 +1426,7 @@
         "z": "843f1567.7384e8",
         "name": "",
         "group": "29dfb3cc.bb24fc",
-        "order": 5,
+        "order": 4,
         "width": "3",
         "height": "3",
         "gtype": "gage",
@@ -1500,11 +1500,11 @@
         "z": "843f1567.7384e8",
         "name": "",
         "group": "29dfb3cc.bb24fc",
-        "order": 3,
+        "order": 2,
         "width": "3",
         "height": "3",
         "gtype": "gage",
-        "title": "Temperature, C",
+        "title": "Outside temp, C",
         "label": "F",
         "format": "{{value}}",
         "min": "-5",
@@ -1618,7 +1618,7 @@
         "type": "ui_text",
         "z": "b457d8d.7f48e28",
         "group": "dcc6d76c.737608",
-        "order": 1,
+        "order": 10,
         "width": 0,
         "height": 0,
         "name": "",
@@ -1679,7 +1679,7 @@
         "type": "ui_text",
         "z": "b457d8d.7f48e28",
         "group": "dcc6d76c.737608",
-        "order": 10,
+        "order": 19,
         "width": 0,
         "height": 0,
         "name": "",
@@ -1696,7 +1696,7 @@
         "z": "b457d8d.7f48e28",
         "name": "",
         "group": "dcc6d76c.737608",
-        "order": 2,
+        "order": 11,
         "width": "3",
         "height": "1",
         "passthru": false,
@@ -1722,7 +1722,7 @@
         "z": "b457d8d.7f48e28",
         "name": "",
         "group": "dcc6d76c.737608",
-        "order": 3,
+        "order": 12,
         "width": "3",
         "height": "1",
         "passthru": false,
@@ -2084,7 +2084,7 @@
         "z": "b457d8d.7f48e28",
         "name": "",
         "group": "dcc6d76c.737608",
-        "order": 5,
+        "order": 14,
         "width": "3",
         "height": "1",
         "passthru": false,
@@ -2110,7 +2110,7 @@
         "z": "b457d8d.7f48e28",
         "name": "",
         "group": "dcc6d76c.737608",
-        "order": 6,
+        "order": 15,
         "width": "3",
         "height": "1",
         "passthru": false,
@@ -2189,7 +2189,7 @@
         "type": "ui_text",
         "z": "b457d8d.7f48e28",
         "group": "dcc6d76c.737608",
-        "order": 4,
+        "order": 13,
         "width": 0,
         "height": 0,
         "name": "",
@@ -2234,7 +2234,7 @@
         "z": "b457d8d.7f48e28",
         "name": "",
         "group": "dcc6d76c.737608",
-        "order": 8,
+        "order": 17,
         "width": "3",
         "height": "1",
         "passthru": false,
@@ -2260,7 +2260,7 @@
         "z": "b457d8d.7f48e28",
         "name": "",
         "group": "dcc6d76c.737608",
-        "order": 9,
+        "order": 18,
         "width": "3",
         "height": "1",
         "passthru": false,
@@ -2339,7 +2339,7 @@
         "type": "ui_text",
         "z": "b457d8d.7f48e28",
         "group": "dcc6d76c.737608",
-        "order": 7,
+        "order": 16,
         "width": 0,
         "height": 0,
         "name": "",
@@ -2458,12 +2458,12 @@
         "type": "mqtt out",
         "z": "2c328709.73b718",
         "name": "query IP",
-        "topic": "hata/sw/cm/sonoff2/IPAddress1",
+        "topic": "hata/sw/cm/tykalka1/IPAddress1",
         "qos": "1",
         "retain": "false",
         "broker": "15ed38db.fc1a27",
-        "x": 497.1000633239746,
-        "y": 348.0000104904175,
+        "x": 461.10005950927734,
+        "y": 706.9999847412109,
         "wires": []
     },
     {
@@ -2474,8 +2474,8 @@
         "active": true,
         "console": "false",
         "complete": "false",
-        "x": 460.10003662109375,
-        "y": 400,
+        "x": 424.1000328063965,
+        "y": 758.9999742507935,
         "wires": []
     },
     {
@@ -2489,12 +2489,13 @@
         "repeat": "600",
         "crontab": "",
         "once": true,
-        "x": 167.1000099182129,
-        "y": 352.0000114440918,
+        "x": 131.10000610351562,
+        "y": 710.9999856948853,
         "wires": [
             [
                 "94f83ac8.5c0aa8",
-                "b667f87b.e42918"
+                "b667f87b.e42918",
+                "c7783e98.540ac"
             ]
         ]
     },
@@ -2524,7 +2525,7 @@
         "width": "3",
         "height": "3",
         "gtype": "gage",
-        "title": "Air quality, Methane/CO sensor",
+        "title": "Air quality, gas/CO",
         "label": "",
         "format": "{{value}}",
         "min": 0,
@@ -2536,8 +2537,8 @@
         ],
         "seg1": "4",
         "seg2": "7",
-        "x": 840.0000228881836,
-        "y": 1723.6000757217407,
+        "x": 830.0000228881836,
+        "y": 1723.600076675415,
         "wires": []
     },
     {
@@ -2553,6 +2554,592 @@
         "wires": [
             [
                 "80040cf9.d9ff5"
+            ]
+        ]
+    },
+    {
+        "id": "22b281e4.551cde",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "MB light ON",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 154,
+        "y": 1204,
+        "wires": [
+            [
+                "29d80f94.bc27f",
+                "e0ae178b.67cb58"
+            ]
+        ]
+    },
+    {
+        "id": "f460a878.e8f478",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "MB light OFF",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 152.90000534057617,
+        "y": 1239.1999759674072,
+        "wires": [
+            [
+                "29d80f94.bc27f",
+                "e0ae178b.67cb58"
+            ]
+        ]
+    },
+    {
+        "id": "29d80f94.bc27f",
+        "type": "mqtt out",
+        "z": "b457d8d.7f48e28",
+        "name": "tykalka1_on",
+        "topic": "hata/sw/cm/tykalka1/POWER",
+        "qos": "2",
+        "retain": "false",
+        "broker": "15ed38db.fc1a27",
+        "x": 411.00010108947754,
+        "y": 1237.8000001907349,
+        "wires": []
+    },
+    {
+        "id": "e0ae178b.67cb58",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 407.0000286102295,
+        "y": 1186.0000019073486,
+        "wires": []
+    },
+    {
+        "id": "4d60aa5c.c1b234",
+        "type": "mqtt in",
+        "z": "b457d8d.7f48e28",
+        "name": "tykalka1 STATE",
+        "topic": "hata/sw/st/tykalka1/POWER",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 131.00001525878906,
+        "y": 1325.4000492095947,
+        "wires": [
+            [
+                "bff3c9b2.991488",
+                "edf0c714.39f118"
+            ]
+        ]
+    },
+    {
+        "id": "bff3c9b2.991488",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 305.0000705718994,
+        "y": 1368.4000463485718,
+        "wires": []
+    },
+    {
+        "id": "edf0c714.39f118",
+        "type": "ui_text",
+        "z": "b457d8d.7f48e28",
+        "group": "dcc6d76c.737608",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "MB light:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 629.9001655578613,
+        "y": 1324.6002445220947,
+        "wires": []
+    },
+    {
+        "id": "5da4ba69.d01b64",
+        "type": "json",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "pretty": false,
+        "x": 308.00001525878906,
+        "y": 1324.4000759124756,
+        "wires": [
+            [
+                "2be7c58d.20e59a"
+            ]
+        ]
+    },
+    {
+        "id": "2be7c58d.20e59a",
+        "type": "function",
+        "z": "b457d8d.7f48e28",
+        "name": "parse state",
+        "func": "msg.payload = msg.payload.POWER;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 459.90003967285156,
+        "y": 1293.9999904632568,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2379d5e4.32a79a",
+        "type": "mqtt in",
+        "z": "2c328709.73b718",
+        "name": "tykalka1",
+        "topic": "hata/sw/st/tykalka1/RESULT",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 106,
+        "y": 568,
+        "wires": [
+            [
+                "50f2777a.8cc418"
+            ]
+        ]
+    },
+    {
+        "id": "69ad95d0.66a48c",
+        "type": "debug",
+        "z": "2c328709.73b718",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 647.0000228881836,
+        "y": 631.0000009536743,
+        "wires": []
+    },
+    {
+        "id": "78b463d5.af2fec",
+        "type": "ui_text",
+        "z": "2c328709.73b718",
+        "group": "4593d764.926248",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "MB light:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 817.9001312255859,
+        "y": 563.2001934051514,
+        "wires": []
+    },
+    {
+        "id": "50f2777a.8cc418",
+        "type": "json",
+        "z": "2c328709.73b718",
+        "name": "",
+        "pretty": false,
+        "x": 245.99999618530273,
+        "y": 568.0000653266907,
+        "wires": [
+            [
+                "ab0a4a2d.4de7d8"
+            ]
+        ]
+    },
+    {
+        "id": "ab0a4a2d.4de7d8",
+        "type": "function",
+        "z": "2c328709.73b718",
+        "name": "parse state",
+        "func": "msg.payload = msg.payload.IPAddress1;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 403.89998054504395,
+        "y": 569.5999994277954,
+        "wires": [
+            [
+                "69ad95d0.66a48c",
+                "1e210b69.c62425"
+            ]
+        ]
+    },
+    {
+        "id": "1e210b69.c62425",
+        "type": "function",
+        "z": "2c328709.73b718",
+        "name": "add date",
+        "func": "msg.payload = new Date().toLocaleString('en-US', {hour12:false})+\": \"+ msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 607.9999771118164,
+        "y": 566.0000019073486,
+        "wires": [
+            [
+                "78b463d5.af2fec"
+            ]
+        ]
+    },
+    {
+        "id": "c7783e98.540ac",
+        "type": "mqtt out",
+        "z": "2c328709.73b718",
+        "name": "query IP",
+        "topic": "hata/sw/cm/sonoff2/IPAddress1",
+        "qos": "1",
+        "retain": "false",
+        "broker": "15ed38db.fc1a27",
+        "x": 460,
+        "y": 661.5999755859375,
+        "wires": []
+    },
+    {
+        "id": "10f46ee4.b51ee1",
+        "type": "alexa-local",
+        "z": "b457d8d.7f48e28",
+        "devicename": "Hallway",
+        "inputtrigger": false,
+        "x": 150.1000099182129,
+        "y": 1486.5999717712402,
+        "wires": [
+            [
+                "99a5867d.365c68",
+                "bb917217.1dbd8"
+            ]
+        ]
+    },
+    {
+        "id": "99a5867d.365c68",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "true",
+        "x": 363.10003662109375,
+        "y": 1485.7999877929688,
+        "wires": []
+    },
+    {
+        "id": "47826a2e.2384a4",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Hallway light ON",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 168,
+        "y": 1583.199951171875,
+        "wires": [
+            [
+                "bb917217.1dbd8",
+                "c0ff1a30.e25048"
+            ]
+        ]
+    },
+    {
+        "id": "f52bd33c.088f5",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 6,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Hallway light OFF",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 176.90000534057617,
+        "y": 1618.3999271392822,
+        "wires": [
+            [
+                "bb917217.1dbd8",
+                "c0ff1a30.e25048"
+            ]
+        ]
+    },
+    {
+        "id": "bb917217.1dbd8",
+        "type": "mqtt out",
+        "z": "b457d8d.7f48e28",
+        "name": "dual1_power1",
+        "topic": "hata/sw/cm/dual1/POWER1",
+        "qos": "2",
+        "retain": "false",
+        "broker": "15ed38db.fc1a27",
+        "x": 425.00010108947754,
+        "y": 1616.9999513626099,
+        "wires": []
+    },
+    {
+        "id": "c0ff1a30.e25048",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 411.0000286102295,
+        "y": 1565.1999530792236,
+        "wires": []
+    },
+    {
+        "id": "ec37c832.8579e8",
+        "type": "mqtt in",
+        "z": "b457d8d.7f48e28",
+        "name": "dual1 STATE",
+        "topic": "hata/sw/st/dual1/POWER1",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 124.00001525878906,
+        "y": 1706.5999774932861,
+        "wires": [
+            [
+                "23630e11.efe3f2",
+                "dbcb90d2.e308c"
+            ]
+        ]
+    },
+    {
+        "id": "23630e11.efe3f2",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 309.0000705718994,
+        "y": 1747.5999975204468,
+        "wires": []
+    },
+    {
+        "id": "dbcb90d2.e308c",
+        "type": "ui_text",
+        "z": "b457d8d.7f48e28",
+        "group": "dcc6d76c.737608",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Hallway light:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 643.9001655578613,
+        "y": 1703.8001956939697,
+        "wires": []
+    },
+    {
+        "id": "8a48f17a.0a833",
+        "type": "json",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "pretty": false,
+        "x": 313.00003242492676,
+        "y": 1673.5999774932861,
+        "wires": [
+            [
+                "2087e550.42d4da"
+            ]
+        ]
+    },
+    {
+        "id": "2087e550.42d4da",
+        "type": "function",
+        "z": "b457d8d.7f48e28",
+        "name": "parse state",
+        "func": "msg.payload = msg.payload.POWER;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 467.90003967285156,
+        "y": 1673.200050354004,
+        "wires": [
+            [
+                "dbcb90d2.e308c"
+            ]
+        ]
+    },
+    {
+        "id": "b6da85ac.461bf8",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 8,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Bathroom light ON",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "",
+        "x": 156,
+        "y": 1832,
+        "wires": [
+            [
+                "4a62b4e8.387b4c",
+                "2536bfae.1e869"
+            ]
+        ]
+    },
+    {
+        "id": "505e2807.35cf78",
+        "type": "ui_button",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "group": "dcc6d76c.737608",
+        "order": 9,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Bathroom light OFF",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "",
+        "x": 154.90000534057617,
+        "y": 1867.1999759674072,
+        "wires": [
+            [
+                "4a62b4e8.387b4c",
+                "2536bfae.1e869"
+            ]
+        ]
+    },
+    {
+        "id": "4a62b4e8.387b4c",
+        "type": "mqtt out",
+        "z": "b457d8d.7f48e28",
+        "name": "dual1_power2",
+        "topic": "hata/sw/cm/dual1/POWER2",
+        "qos": "2",
+        "retain": "false",
+        "broker": "15ed38db.fc1a27",
+        "x": 403.00010108947754,
+        "y": 1865.8000001907349,
+        "wires": []
+    },
+    {
+        "id": "2536bfae.1e869",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 389.0000286102295,
+        "y": 1814.0000019073486,
+        "wires": []
+    },
+    {
+        "id": "4804169b.6f0028",
+        "type": "mqtt in",
+        "z": "b457d8d.7f48e28",
+        "name": "dual1 power1 STATE",
+        "topic": "hata/sw/st/dual1/POWER2",
+        "qos": "1",
+        "broker": "15ed38db.fc1a27",
+        "x": 133.00001525878906,
+        "y": 1953.4000492095947,
+        "wires": [
+            [
+                "a5a10509.6a5bb8",
+                "1380733.892df8d",
+                "db532efb.019cb"
+            ]
+        ]
+    },
+    {
+        "id": "a5a10509.6a5bb8",
+        "type": "debug",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "active": true,
+        "console": "false",
+        "complete": "payload",
+        "x": 319.00008392333984,
+        "y": 2003.4000835418701,
+        "wires": []
+    },
+    {
+        "id": "1380733.892df8d",
+        "type": "ui_text",
+        "z": "b457d8d.7f48e28",
+        "group": "dcc6d76c.737608",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Bathroom light:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 670.9001655578613,
+        "y": 1950.6001796722412,
+        "wires": []
+    },
+    {
+        "id": "db532efb.019cb",
+        "type": "json",
+        "z": "b457d8d.7f48e28",
+        "name": "",
+        "pretty": false,
+        "x": 343.0000305175781,
+        "y": 1922.4000577926636,
+        "wires": [
+            [
+                "8536eb9d.86c4b8"
+            ]
+        ]
+    },
+    {
+        "id": "8536eb9d.86c4b8",
+        "type": "function",
+        "z": "b457d8d.7f48e28",
+        "name": "parse state",
+        "func": "msg.payload = msg.payload.POWER;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 503.90003967285156,
+        "y": 1984.0000581741333,
+        "wires": [
+            [
+                "1380733.892df8d"
             ]
         ]
     }

@@ -41,7 +41,7 @@ const char* HOSTNAME = "esp_geiger";
 #define CBUF_SZ 256  //char buffer size for posting MQTT
 
 
-#define R0_VAL 1.08   //MQ9 gas sensor calibration val
+#define R0_VAL 1.2   //MQ9 gas sensor calibration val
 #define LOGIC_LEVEL 3.3   //3.3V logic
 
 // ThingSpeak Settings
